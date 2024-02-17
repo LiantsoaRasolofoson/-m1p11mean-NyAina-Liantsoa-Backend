@@ -6,6 +6,7 @@ var logger = require('morgan');
 
 var homeController = require('./controllers/home.controller');
 var authController = require('./controllers/auth.controller');
+var userController = require('./controllers/user.controller');
 
 var app = express();
 
@@ -23,6 +24,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Setting the controller
 app.use('/', homeController);
 app.use('/auth', authController);
+app.use('/user', userController);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

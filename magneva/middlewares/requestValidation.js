@@ -12,6 +12,7 @@ const concatErrorMessage = (errors) => {
 check = (req, res, next) => {
     const result = validationResult(req);
     if(!result.isEmpty()){
+        console.log("test");
         return res.status(400).send({ error: concatErrorMessage(result.array())});
     }
     req.matchedData = matchedData(req);

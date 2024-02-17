@@ -1,23 +1,14 @@
 const router = require("express").Router();
 const { body } = require('express-validator')
-const { verifySignUp, requestValidation } = require('../middlewares')
+const { requestValidation } = require('../middlewares')
 const { authService } = require('../services');
-
-
-function setAccessControlAllowHeader(req, res, next) {
-    res.header(
-        "Access-Control-Allow-Headers",
-      "x-access-token, Origin, Content-Type, Accept"
-    );
-    next();
-}
 
 function signinMiddlewares(){
     return [
         body('email').isEmail().withMessage('Email invalide'),
         body('password').notEmpty().withMessage('Mot de passe requise'),
-        requestValidation.check,
-        setAccessControlAllowHeader
+        body('role').notEmpty().withMessage('Role requise'),
+        requestValidation.check
     ]
 }
 
@@ -32,8 +23,7 @@ function signUpMiddlewares(){
         body('sex').notEmpty(),
         body('password').notEmpty().withMessage('Mot de passe requise'),
         body('email').isEmail().withMessage('Email requise'),
-        requestValidation.check,
-        setAccessControlAllowHeader
+        requestValidation.check
     ]
 }
 

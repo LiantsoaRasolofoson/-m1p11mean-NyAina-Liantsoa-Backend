@@ -2,10 +2,67 @@ const db = require("../models");
 const User = db.user;
 const Role = db.role;
 const ROLES = db.ROLES;
+const jwt = require("jsonwebtoken")
+const config = require("../config/auth.config");
+
 var bcrypt = require("bcryptjs")
 
-const signIn = (req, res) => {
-    res.status(200).send(req.matchedData)
+const generateJWT = (user) => {
+    return jwt.sign(
+        { 
+            id: user._id,
+            roles: user.roles
+        },
+        config.secret,
+        {
+          algorithm: 'HS256',
+          allowInsecureKeySizes: true,
+          expiresIn: 86400, // 24 hours
+        });
+}
+
+const isPasswordValid = (signInPassword, userPassword) => {
+    return bcrypt.compareSync(
+       signInPassword,
+        userPassword
+    );
+}
+
+const doesUserHaveAcces = (userRoles, roleRequired) => {
+    return userRoles.some( userRole => userRole.name === roleRequired );
+}
+
+const signIn = async (req, res) => {
+    let data = req.matchedData;
+
+    try{
+        let user = await User.findOne({ email: data.email });
+        if(!user){
+            return res.status(400).send({error: {message: "Utilisateur pas trouvee"}});
+        }
+
+        if(!isPasswordValid(data.password, user.password)){
+            return res.status(400).send({error: {message: "Mot de passe erronee"}});
+        }
+
+        await user.populate("roles");
+
+        if(doesUserHaveAcces(user.roles, data.role) == false){
+            return res.status(400).send({error: {message: "Utilisateur n'a pas le role requise"} })
+        }
+
+        let token = generateJWT(user);
+        res.status(200).send({
+            id: user._id,
+            name: user.name,
+            firstName: user.firstName,
+            roles: user.roles.map((role) => role.name),
+            token: token
+        });
+
+    }catch(err){
+        res.status(500).send({error: {message: err.message}})
+    }
 }
 
 const isDuplicateEmail = async (email) => {
@@ -39,7 +96,6 @@ const signUp = async (req, res) => {
 
     try{
         if(await isDuplicateEmail(user.email)){
-            console.log(isDuplicateEmail(user.email))
             return res.status(400).send({error: "Mail deja utilise"});
         }
         if(!doesRoleExist(data.roles)){
@@ -51,6 +107,7 @@ const signUp = async (req, res) => {
         roles = await Role.find({name: { $in: data.roles } }).exec();
         user.roles = roles.map(role => role._id);
         await user.save();
+
         res.status(201).send(user);
 
     } catch(err) {
