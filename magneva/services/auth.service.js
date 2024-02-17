@@ -5,7 +5,7 @@ const ROLES = db.ROLES;
 const jwt = require("jsonwebtoken")
 const config = require("../config/auth.config");
 
-var bcrypt = require("bcryptjs")
+var bcrypt = require("bcryptjs");
 
 const generateJWT = (user) => {
     return jwt.sign(
