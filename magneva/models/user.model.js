@@ -15,7 +15,21 @@ const User = mongoose.model(
                     type: mongoose.Schema.Types.ObjectId,
                     ref: "Role"
                 }
-            ] 
+            ],
+            startDate: { 
+                type: Date, 
+                default: null, 
+                allowNull: true 
+            },
+            endDate: { 
+                type: Date, 
+                default: null, 
+                allowNull: true 
+            },
+            picture: {
+                type: String,
+                default: null
+            }
         },
         { timestamps: true}
     )
