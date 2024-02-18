@@ -7,8 +7,17 @@
 var app = require('../app');
 var debug = require('debug')('magneva:server');
 var http = require('http');
-var db = require("../models/");
-var Role = db.role;
+const db = require("../models");
+const cors = require("cors")
+
+
+var corsOptions = {
+  origin: true
+};
+
+app.use(cors(corsOptions));
+
+
 
 /**
  * Connect to mongoose
