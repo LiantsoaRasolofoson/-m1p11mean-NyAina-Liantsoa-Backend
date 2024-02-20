@@ -6,7 +6,7 @@ const Service = mongoose.model(
         {
             name: String,
             price: Number,
-            duration: String,
+            duration: Number,
             commission: Number
         },
         { timestamps: true }
