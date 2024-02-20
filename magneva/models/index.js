@@ -8,8 +8,11 @@ db.mongoose = mongoose;
 db.uri = dbConfig.uri;
 
 db.user = require("./user.model.js");
-db.role = require("./role.model.js")
 db.openingHour = require("./openingHour.model.js");
+db.role = require("./role.model.js");
+db.service = require("./service.model.js");
+db.serviceEmployee = require("./serviceEmployee.model.js");
+
 
 db.ROLES = ["user", "employee", "admin"]
 
