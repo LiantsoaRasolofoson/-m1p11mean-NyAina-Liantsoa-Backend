@@ -11,8 +11,13 @@ function createAppointmentMiddlewares(){
     ]   
 }
 
-router.post("/create", createAppointmentMiddlewares(), (req, res) => {
-    appointmentService.createAppointment(req, res);
+router.post("/create", createAppointmentMiddlewares(), (req, res, next) => {
+    appointmentService.createAppointment(req, res, next);
+})
+
+router.get("/list", (req, res) => {
+    console.log("Get appointments");
+    appointmentService.getAppointments(req, res);
 })
 
 module.exports = router;
