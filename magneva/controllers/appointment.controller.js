@@ -15,4 +15,8 @@ router.post("/create", createAppointmentMiddlewares(), (req, res) => {
     appointmentService.createAppointment(req, res);
 })
 
+router.get("/list", (req, res) => {
+    appointmentService.getAppointments(req, res);
+})
+
 module.exports = router;

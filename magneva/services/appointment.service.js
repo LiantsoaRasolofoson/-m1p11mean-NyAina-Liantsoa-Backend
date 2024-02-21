@@ -44,6 +44,11 @@ const createAppointment = async (req, res) => {
     }
 }
 
+const getAppointments = async (req, res) => {
+    res.status(200).send(await Appointment.find({  user : req.query.userId }));
+}
+
 module.exports = {
-    createAppointment
+    createAppointment,
+    getAppointments
 }
