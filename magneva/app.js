@@ -9,6 +9,7 @@ var authController = require('./controllers/auth.controller');
 var userController = require('./controllers/user.controller');
 var managerController = require('./controllers/manager.controller');
 var serviceController = require('./controllers/service.controller');
+var appointmentController = require('./controllers/appointment.controller');
 
 var app = express();
 
@@ -29,6 +30,7 @@ app.use('/auth', authController);
 app.use('/user', userController);
 app.use('/manager', managerController);
 app.use('/service', serviceController);
+app.use('/appointment', appointmentController);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -37,8 +39,6 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-  console.log(err);
-
   res.status(500).json({ error: 'Internal Server Error' });
 });
 

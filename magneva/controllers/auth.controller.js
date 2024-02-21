@@ -1,6 +1,6 @@
 const router = require("express").Router();
-const { body } = require('express-validator')
-const { requestValidation } = require('../middlewares')
+const { body } = require('express-validator');
+const { requestValidation } = require('../middlewares');
 const { authService } = require('../services');
 
 function signinMiddlewares(){
