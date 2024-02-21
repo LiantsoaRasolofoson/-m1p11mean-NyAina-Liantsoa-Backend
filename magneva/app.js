@@ -8,6 +8,7 @@ var homeController = require('./controllers/home.controller');
 var authController = require('./controllers/auth.controller');
 var userController = require('./controllers/user.controller');
 var managerController = require('./controllers/manager.controller');
+var serviceController = require('./controllers/service.controller');
 
 var app = express();
 
@@ -27,6 +28,7 @@ app.use('/', homeController);
 app.use('/auth', authController);
 app.use('/user', userController);
 app.use('/manager', managerController);
+app.use('/service', serviceController);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

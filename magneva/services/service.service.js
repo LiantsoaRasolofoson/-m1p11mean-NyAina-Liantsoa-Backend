@@ -18,6 +18,17 @@ const createService = async (req, res) => {
     }
 };
 
+const getAllServices = async (req, res) => {
+    try {
+        const services = await User.find().exec();
+        res.status(200).send(services);
+    }
+    catch (error) {
+        res.status(400).send({ error: error.message });
+    }
+}
+
 module.exports = {
-    createService
+    createService,
+    getAllServices
 }
