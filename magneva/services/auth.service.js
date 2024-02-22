@@ -102,7 +102,7 @@ const isDateValide = (date) => {
     return false;
 }
 
-const signUp = async (req, res) => {
+const signUp = async (req, res, next) => {
     let data = req.body;
 
     const user = new User({

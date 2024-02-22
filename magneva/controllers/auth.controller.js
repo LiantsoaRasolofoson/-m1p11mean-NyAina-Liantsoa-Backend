@@ -27,8 +27,8 @@ function signUpMiddlewares(){
     ]
 }
 
-router.post("/signup", signUpMiddlewares(), (req, res) => {
-    authService.signUp(req, res);
+router.post("/signup", signUpMiddlewares(), (req, res, next) => {
+    authService.signUp(req, res, next);
 })
 
 module.exports = router;
