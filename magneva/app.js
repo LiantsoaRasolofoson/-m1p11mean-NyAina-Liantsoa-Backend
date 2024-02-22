@@ -10,6 +10,7 @@ var userController = require('./controllers/user.controller');
 var managerController = require('./controllers/manager.controller');
 var serviceController = require('./controllers/service.controller');
 var appointmentController = require('./controllers/appointment.controller');
+const cors = require("cors");
 
 var app = express();
 const cors = require("cors")
@@ -25,6 +26,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(cors());
 
 
 // Setting the controller
@@ -42,7 +44,12 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-  res.status(500).json({ error: 'Internal Server Error' });
+  res.status(err.statusCode || 500).json(
+    { 
+      error:  err.errorCode || 'Internal Server Error',
+      message: err.message,
+      statusCode: err.statusCode || 500
+    });
 });
 
 module.exports = app;
