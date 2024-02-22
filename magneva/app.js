@@ -47,7 +47,7 @@ app.use(function(err, req, res, next) {
     { 
       error:  err.errorCode || 'Internal Server Error',
       message: err.message,
-      statusCode: err.statusCode || 500
+      status: err.statusCode || 500
     });
 });
 
