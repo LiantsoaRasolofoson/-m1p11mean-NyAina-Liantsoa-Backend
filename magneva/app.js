@@ -12,6 +12,9 @@ var serviceController = require('./controllers/service.controller');
 var appointmentController = require('./controllers/appointment.controller');
 
 var app = express();
+const cors = require("cors")
+
+app.use(cors());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
