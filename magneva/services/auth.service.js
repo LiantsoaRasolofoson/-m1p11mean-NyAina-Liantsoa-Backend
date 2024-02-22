@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken")
 const config = require("../config/auth.config");
 
 var bcrypt = require("bcryptjs");
+const HttpError = require("../httperror");
 
 const generateJWT = (user) => {
     return jwt.sign(
@@ -115,10 +116,10 @@ const signUp = async (req, res) => {
 
     try {
         if (await isDuplicateEmail(user.email)) {
-            return res.status(400).send({ error: "Mail deja utilise" });
+            throw new HttpError("Ce mail est déjà utilisé",400 );
         }
         if (!doesRoleExist(data.roles)) {
-            return res.status(400).send({ error: "Ce role n'existe pas" })
+            throw new HttpError("Ce rôle n'existe pas",400 );
         }
         if (isRoleEmployee(data.roles)) {
             const startDate = new Date(data.startDate);
@@ -128,7 +129,7 @@ const signUp = async (req, res) => {
                 isReturn = true;
             }
             else {
-                return res.status(400).send({ error: "Date invalide" });
+                throw new HttpError("Date invalide",400 );
             }
         }
 
@@ -144,7 +145,7 @@ const signUp = async (req, res) => {
         res.status(201).send(user);
 
     } catch (err) {
-        res.status(400).send({ error: err.message })
+        next(err);
     }
 }
 
