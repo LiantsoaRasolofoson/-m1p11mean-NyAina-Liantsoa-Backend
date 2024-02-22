@@ -13,7 +13,6 @@ var appointmentController = require('./controllers/appointment.controller');
 const cors = require("cors");
 
 var app = express();
-const cors = require("cors")
 
 app.use(cors());
 

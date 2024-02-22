@@ -9,16 +9,16 @@ function employeeMiddlewares(){
     ]
 }
 
-router.post("/employee/create", employeeMiddlewares(), (req, res) => {
-    employeeService.createEmployee(req, res);
+router.post("/employee/create", employeeMiddlewares(), (req, res, next) => {
+    employeeService.createEmployee(req, res, next);
 })
 
-router.get("/employee/list", employeeMiddlewares(),  (req, res) => {
-    employeeService.getAllEmployees(req, res);
+router.get("/employee/list", employeeMiddlewares(),  (req, res, next) => {
+    employeeService.getAllEmployees(req, res, next);
 })
 
-router.get("/employee/detail/:employeeID", employeeMiddlewares(), (req, res) => {
-    employeeService.getEmployee(req, res);
+router.get("/employee/detail/:employeeID", employeeMiddlewares(), (req, res, next) => {
+    employeeService.getEmployee(req, res, next);
 })
 
 module.exports = router;

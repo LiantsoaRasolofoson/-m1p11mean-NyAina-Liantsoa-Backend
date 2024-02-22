@@ -13,20 +13,20 @@ function createServiceMiddlewares(){
     ]
 }
 
-router.post("/create", createServiceMiddlewares(), (req, res) => {
-    serviceService.createService(req, res);
+router.post("/create", createServiceMiddlewares(), (req, res, next) => {
+    serviceService.createService(req, res, next);
 });
 
-router.get("/list", (req, res) => {
-    serviceService.getAllServices(req, res);
+router.get("/list", (req, res, next) => {
+    serviceService.getAllServices(req, res, next);
 });
 
-router.get("/detail/:serviceID", (req, res) => {
-    serviceService.getService(req, res);
+router.get("/detail/:serviceID", (req, res, next) => {
+    serviceService.getService(req, res, next);
 });
 
-router.put("/update/:serviceID", createServiceMiddlewares(), (req, res) => {
-    serviceService.updateService(req, res);
+router.put("/update/:serviceID", createServiceMiddlewares(), (req, res, next) => {
+    serviceService.updateService(req, res, next);
 });
 
 module.exports = router;

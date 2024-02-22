@@ -3,7 +3,8 @@ class HttpError extends Error {
 
     errorMeaning = {
         500: 'Internal Server Error',
-        400: 'Bad request'
+        400: 'Bad request',
+        404: 'Not found'
     }
 
     constructor(message, statusCode){
