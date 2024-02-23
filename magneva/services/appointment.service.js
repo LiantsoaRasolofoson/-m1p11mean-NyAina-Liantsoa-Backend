@@ -3,6 +3,7 @@ const Appointment = db.appointment;
 const OpeningHour = db.openingHour;
 const moment = require('moment');
 const momentTimezone = require('moment-timezone');
+const HttpError = require('../httperror');
 
 const checkHour = async (date, hour) => {
     let openingHour = await OpeningHour.findOne({ day: date.getDay() }).exec();
@@ -16,7 +17,7 @@ const checkDate = (date) => {
     let timezoneDate = momentTimezone.tz(date, 'Indian/Antananarivo').format("YYYY-MM-DD");
   
     if(timezoneDate < currentDate){
-        console.log("Veuillez choisir une date valide");
+        throw new HttpError("Veuillez choisir une date valide", 400);
     }
 }
 
@@ -25,22 +26,21 @@ const createAppointment = async (req, res) => {
     data.date = new Date(data.date);
     data.hour = moment(data.hour, "HH:mm").format("HHmm");
 
-    checkDate(data.date);
-    await checkHour(data.date, data.hour);
-    
-    //create the appointment
-    let appointment = new Appointment ({
-        date : data.date,
-        hour : data.hour,
-        user: data.userId
-    })
-
     try{
+        checkDate(data.date);
+        await checkHour(data.date, data.hour);
+    
+            //create the appointment
+        let appointment = new Appointment ({
+            date : data.date,
+            hour : data.hour,
+            user: data.userId
+        })
         await appointment.save();
-        res.status(200).send("Appointment saved");
-    }
-    catch(err){
-        res.send(err);
+       return appointment;   
+
+    }catch(err){
+        throw new err;
     }
 }
 

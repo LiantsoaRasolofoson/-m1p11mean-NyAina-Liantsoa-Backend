@@ -11,8 +11,18 @@ function createAppointmentMiddlewares(){
     ]   
 }
 
-router.post("/create", createAppointmentMiddlewares(), (req, res) => {
-    appointmentService.createAppointment(req, res);
+router.post("/create", createAppointmentMiddlewares(), async (req, res, next) => {
+    try{
+        res.status(201).send(await appointmentService.createAppointment(req, res));   
+    }catch(err){
+        next(err);
+    }
+    
+})
+
+router.get("/list", (req, res) => {
+    console.log("Get appointments");
+    appointmentService.getAppointments(req, res);
 })
 
 router.get("/list", (req, res) => {

@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken")
 const config = require("../config/auth.config");
 
 var bcrypt = require("bcryptjs");
+const HttpError = require("../httperror");
 
 const generateJWT = (user) => {
     return jwt.sign(
@@ -38,30 +39,29 @@ const signIn = async (req, res) => {
     try {
         let user = await User.findOne({ email: data.email });
         if (!user) {
-            return res.status(400).send({ error: { message: "Utilisateur pas trouvee" } });
+            throw new HttpError("Utilisateur pas trouvee", 400);
         }
 
         if (!isPasswordValid(data.password, user.password)) {
-            return res.status(400).send({ error: { message: "Mot de passe erronee" } });
+            throw new HttpError("Utilisateur pas trouvee", 400);
         }
 
         await user.populate("roles");
 
         if (doesUserHaveAcces(user.roles, data.role) == false) {
-            return res.status(400).send({ error: { message: "Utilisateur n'a pas le role requise" } })
+            throw new HttpError("Utilisateur n'a pas le role requise", 400);
         }
 
         let token = generateJWT(user);
-        res.status(200).send({
+        return {
             id: user._id,
             name: user.name,
             firstName: user.firstName,
             roles: user.roles.map((role) => role.name),
             token: token
-        });
-
+        }
     } catch (err) {
-        res.status(500).send({ error: { message: err.message } })
+        throw err;
     }
 }
 
@@ -115,10 +115,10 @@ const signUp = async (req, res) => {
 
     try {
         if (await isDuplicateEmail(user.email)) {
-            return res.status(400).send({ error: "Mail deja utilise" });
+            throw new HttpError("Ce mail est déjà utilisé",400 );
         }
         if (!doesRoleExist(data.roles)) {
-            return res.status(400).send({ error: "Ce role n'existe pas" })
+            throw new HttpError("Ce rôle n'existe pas",400 );
         }
         if (isRoleEmployee(data.roles)) {
             const startDate = new Date(data.startDate);
@@ -128,7 +128,7 @@ const signUp = async (req, res) => {
                 isReturn = true;
             }
             else {
-                return res.status(400).send({ error: "Date invalide" });
+                throw new HttpError("Date invalide",400 );
             }
         }
 
@@ -138,13 +138,10 @@ const signUp = async (req, res) => {
         user.roles = roles.map(role => role._id);
         await user.save();
         
-        if (isRoleEmployee(data.roles)) {
-            return user;
-        }
-        res.status(201).send(user);
+       return user;
 
     } catch (err) {
-        res.status(400).send({ error: err.message })
+       throw err;
     }
 }
 
