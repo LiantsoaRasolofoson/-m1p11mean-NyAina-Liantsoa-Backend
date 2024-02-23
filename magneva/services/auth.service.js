@@ -116,6 +116,7 @@ const signUp = async (req, res, next) => {
 
     try {
         if (await isDuplicateEmail(user.email)) {
+            console.log("Eto za");
             throw new HttpError("Ce mail est déjà utilisé",400 );
         }
         if (!doesRoleExist(data.roles)) {
@@ -145,7 +146,9 @@ const signUp = async (req, res, next) => {
         res.status(201).send(user);
 
     } catch (err) {
-        next(err);
+        console.log("Ici oh");
+        // next(err);
+        throw err;
     }
 }
 

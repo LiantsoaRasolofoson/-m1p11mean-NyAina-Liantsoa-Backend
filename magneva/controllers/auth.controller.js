@@ -28,7 +28,12 @@ function signUpMiddlewares(){
 }
 
 router.post("/signup", signUpMiddlewares(), (req, res, next) => {
-    authService.signUp(req, res, next);
+    try {
+        authService.signUp(req, res, next);
+    } catch (error) {
+        next(error)
+    }
+   
 })
 
 module.exports = router;

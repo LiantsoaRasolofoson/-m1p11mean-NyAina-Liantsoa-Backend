@@ -12,7 +12,7 @@ const createEmployee = async (req, res, next) => {
         if( data.services.length === 0){
             throw new HttpError("Le(s) service(s) est(sont) requis", 400);
         }
-        const user = await signUp(req, res);
+        const user = await signUp(req, res, next);
         const serviceEmployee = new ServiceEmployee({
             employee: user._id
         });
@@ -23,6 +23,7 @@ const createEmployee = async (req, res, next) => {
         res.status(201).send(serviceEmployee);
     }
     catch (error) {
+        console.log("Ato ndray");
         next(error);
     }
 };
