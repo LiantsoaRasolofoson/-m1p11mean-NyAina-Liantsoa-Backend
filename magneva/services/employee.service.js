@@ -20,11 +20,10 @@ const createEmployee = async (req, res, next) => {
         services = await Service.find({ _id: { $in: data.services } }).exec();
         serviceEmployee.services = services.map(service => service._id);
         await serviceEmployee.save();
-        res.status(201).send(serviceEmployee);
+        return serviceEmployee;
     }
     catch (error) {
-        console.log("Ato ndray");
-        next(error);
+        throw error;
     }
 };
 
@@ -32,10 +31,10 @@ const getAllEmployees = async (req, res, next) => {
     try {
         const role = await Role.findOne({ name: "employee" }).exec();
         const employees = await User.find({ roles: role._id }).exec();
-        res.status(200).send(employees);
+       return employees;
     }
     catch (error) {
-        next(error);
+        throw error;
     }
 }
 
@@ -47,12 +46,12 @@ const getEmployee = async (req, res, next) => {
             .populate('services')
         ;
         if(!employee) {
-            throw new HttpError("Cet(te) employé(e) n'existe pas", 404);
+            throw new HttpError("Cet(te) employé(e) n'existe pas", 400);
         }
-        res.status(200).send(employee);
+        return employee;  
     }
     catch (error) {
-        next(error);
+       throw error;
     }
 }
 

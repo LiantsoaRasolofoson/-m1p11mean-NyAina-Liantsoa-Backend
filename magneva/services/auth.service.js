@@ -39,30 +39,29 @@ const signIn = async (req, res) => {
     try {
         let user = await User.findOne({ email: data.email });
         if (!user) {
-            return res.status(400).send({ error: { message: "Utilisateur pas trouvee" } });
+            throw new HttpError("Utilisateur pas trouvee", 400);
         }
 
         if (!isPasswordValid(data.password, user.password)) {
-            return res.status(400).send({ error: { message: "Mot de passe erronee" } });
+            throw new HttpError("Utilisateur pas trouvee", 400);
         }
 
         await user.populate("roles");
 
         if (doesUserHaveAcces(user.roles, data.role) == false) {
-            return res.status(400).send({ error: { message: "Utilisateur n'a pas le role requise" } })
+            throw new HttpError("Utilisateur n'a pas le role requise", 400);
         }
 
         let token = generateJWT(user);
-        res.status(200).send({
+        return {
             id: user._id,
             name: user.name,
             firstName: user.firstName,
             roles: user.roles.map((role) => role.name),
             token: token
-        });
-
+        }
     } catch (err) {
-        res.status(500).send({ error: { message: err.message } })
+        throw err;
     }
 }
 
@@ -102,7 +101,7 @@ const isDateValide = (date) => {
     return false;
 }
 
-const signUp = async (req, res, next) => {
+const signUp = async (req, res) => {
     let data = req.body;
 
     const user = new User({
@@ -140,15 +139,10 @@ const signUp = async (req, res, next) => {
         user.roles = roles.map(role => role._id);
         await user.save();
         
-        if (isRoleEmployee(data.roles)) {
-            return user;
-        }
-        res.status(201).send(user);
+       return user;
 
     } catch (err) {
-        console.log("Ici oh");
-        // next(err);
-        throw err;
+       throw err;
     }
 }
 

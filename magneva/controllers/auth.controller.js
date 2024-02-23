@@ -12,8 +12,14 @@ function signinMiddlewares(){
     ]
 }
 
-router.post("/signin", signinMiddlewares(), (req, res) => {
-    authService.signIn(req, res);
+router.post("/signin", signinMiddlewares(), async (req, res, next) => {
+    try{
+        res.status(200).send(await authService.signIn(req, res));
+    }catch (err) {
+        console.log("controller");
+        next(err);
+    }
+    
 })
 
 function signUpMiddlewares(){
@@ -27,11 +33,11 @@ function signUpMiddlewares(){
     ]
 }
 
-router.post("/signup", signUpMiddlewares(), (req, res, next) => {
-    try {
-        authService.signUp(req, res, next);
-    } catch (error) {
-        next(error)
+router.post("/signup", signUpMiddlewares(), async (req, res, next) => {
+    try{
+        res.status(201).send(await authService.signUp(req, res));
+    }catch(err){
+        next(err);
     }
    
 })

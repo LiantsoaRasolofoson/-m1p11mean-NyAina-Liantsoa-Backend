@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const { requestValidation } = require('../middlewares');
 const { employeeService } = require('../services');
+const { body } = require('express-validator');
 
 // Employe
 function employeeMiddlewares(){
@@ -9,16 +10,50 @@ function employeeMiddlewares(){
     ]
 }
 
-router.post("/employee/create", employeeMiddlewares(), (req, res, next) => {
-    employeeService.createEmployee(req, res, next);
+router.post("/employee/create", employeeMiddlewares(), async(req, res, next) => {
+    try{
+        res.status(201).send(await employeeService.createEmployee(req, res));
+    }catch(error){
+        next(error);
+    }
 })
 
-router.get("/employee/list", employeeMiddlewares(),  (req, res, next) => {
-    employeeService.getAllEmployees(req, res, next);
+router.get("/employee/list", employeeMiddlewares(),  async(req, res, next) => {
+    try{
+        res.status(200).send(await employeeService.getAllEmployees(req, res));
+    }catch(error){
+        next(error);
+    }
+    
 })
 
-router.get("/employee/detail/:employeeID", employeeMiddlewares(), (req, res, next) => {
-    employeeService.getEmployee(req, res, next);
+router.get("/employee/detail/:employeeID", employeeMiddlewares(), async(req, res, next) => {
+    try{
+        res.status(200).send(await employeeService.getEmployee(req, res));
+    }catch(error){
+        next(error);
+    }
+  
+})
+
+// Service
+function createServiceMiddlewares(){
+    return [
+        body('name').notEmpty().withMessage('Nom requise'),
+        body('price').isNumeric().withMessage('Prix invalide'),
+        body('duration').notEmpty().withMessage('Durée requise'),
+        body('commission').isNumeric().withMessage('Commission invalide'),
+        requestValidation.check
+    ]
+}
+
+router.post("/service/create", createServiceMiddlewares(), async(req, res, next) => {
+    try{
+        res.status(201).send(await serviceService.createService(req, res));
+    }catch(error){
+        next(error);
+    }
+   
 })
 
 module.exports = router;

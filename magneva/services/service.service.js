@@ -31,10 +31,10 @@ const createService = async (req, res, next) => {
             picture: data.picture
         });
         await service.save();
-        res.status(201).send(service);
+        return service; 
     } 
     catch (error) {
-        next(error);
+        throw error;
     }
 };
 
