@@ -1,3 +1,4 @@
+const HttpError = require("../httperror");
 const db = require("../models");
 const User = db.user;
 const Role = db.role;
@@ -15,10 +16,10 @@ const createEmployee = async (req, res) => {
         services = await Service.find({ _id: { $in: data.services } }).exec();
         serviceEmployee.services = services.map(service => service._id);
         await serviceEmployee.save();
-        res.status(201).send(serviceEmployee);
+        return serviceEmployee;
     }
     catch (error) {
-        res.status(400).send({ error: error.message });
+        throw error;
     }
 };
 
@@ -26,10 +27,10 @@ const getAllEmployees = async (req, res) => {
     try {
         const role = await Role.findOne({ name: "employee" }).exec();
         const employees = await User.find({ roles: role._id }).exec();
-        res.status(200).send(employees);
+       return employees;
     }
     catch (error) {
-        res.status(400).send({ error: error.message });
+        throw error;
     }
 }
 
@@ -41,12 +42,12 @@ const getEmployee = async (req, res) => {
             .populate('services')
         ;
         if(!employee) {
-            return res.status(404).send({ error: "Cet(te) employé(e) n'existe pas" });
+            throw new HttpError("Cet(te) employé(e) n'existe pas", 400);
         }
-        res.status(200).send(employee);
+        return employee;  
     }
     catch (error) {
-        res.status(400).send({ error: error.message });
+       throw error;
     }
 }
 

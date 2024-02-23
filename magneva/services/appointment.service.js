@@ -21,7 +21,7 @@ const checkDate = (date) => {
     }
 }
 
-const createAppointment = async (req, res, next) => {
+const createAppointment = async (req, res) => {
     let data = req.body;
     data.date = new Date(data.date);
     data.hour = moment(data.hour, "HH:mm").format("HHmm");
@@ -37,9 +37,10 @@ const createAppointment = async (req, res, next) => {
             user: data.userId
         })
         await appointment.save();
-        res.status(200).send("Appointment saved");   
+       return appointment;   
+
     }catch(err){
-        next(err);
+        throw new err;
     }
 }
 

@@ -10,16 +10,30 @@ function employeeMiddlewares(){
     ]
 }
 
-router.post("/employee/create", employeeMiddlewares(), (req, res) => {
-    employeeService.createEmployee(req, res);
+router.post("/employee/create", employeeMiddlewares(), async(req, res, next) => {
+    try{
+        res.status(201).send(await employeeService.createEmployee(req, res));
+    }catch(error){
+        next(error);
+    }
 })
 
-router.get("/employee/list", employeeMiddlewares(),  (req, res) => {
-    employeeService.getAllEmployees(req, res);
+router.get("/employee/list", employeeMiddlewares(),  async(req, res, next) => {
+    try{
+        res.status(200).send(await employeeService.getAllEmployees(req, res));
+    }catch(error){
+        next(error);
+    }
+    
 })
 
-router.get("/employee/detail/:employeeID", employeeMiddlewares(), (req, res) => {
-    employeeService.getEmployee(req, res);
+router.get("/employee/detail/:employeeID", employeeMiddlewares(), async(req, res, next) => {
+    try{
+        res.status(200).send(await employeeService.getEmployee(req, res));
+    }catch(error){
+        next(error);
+    }
+  
 })
 
 // Service
@@ -33,8 +47,13 @@ function createServiceMiddlewares(){
     ]
 }
 
-router.post("/service/create", createServiceMiddlewares(), (req, res) => {
-    serviceService.createService(req, res);
+router.post("/service/create", createServiceMiddlewares(), async(req, res, next) => {
+    try{
+        res.status(201).send(await serviceService.createService(req, res));
+    }catch(error){
+        next(error);
+    }
+   
 })
 
 module.exports = router;
