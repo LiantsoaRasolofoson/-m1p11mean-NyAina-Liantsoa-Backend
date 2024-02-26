@@ -15,7 +15,7 @@ const isServiceExist = async (name) => {
     return service;
 }
 
-const createService = async (req, res, next) => {
+const createService = async (req, res) => {
     let data = req.body;
     try {
         let service1 =  await isServiceExist(data.name);
@@ -28,7 +28,8 @@ const createService = async (req, res, next) => {
             price: data.price,
             duration: moment(data.duree, "HH:mm").format("HHmm"),
             commission: data.commission,
-            picture: data.picture
+            picture: data.picture,
+            description: data.description
         });
         await service.save();
         return service; 
@@ -38,21 +39,21 @@ const createService = async (req, res, next) => {
     }
 };
 
-const getService = async (req, res, next) => {
+const getService = async (req, res) => {
     const serviceID = req.params.serviceID;
     try {
         const service = await Service.findOne({ _id: serviceID}).exec();
         if(!service) {
             throw new HttpError("Ce service n'existe pas" , 404);
         }
-        res.status(200).send(service);
+        return service;
     }
     catch (error) {
-        next(error);
+        throw error;
     }
 }
 
-const updateService = async (req, res, next) => {
+const updateService = async (req, res) => {
     const serviceID = req.params.serviceID;
     let data = req.body;
     try {
@@ -70,21 +71,22 @@ const updateService = async (req, res, next) => {
         service.duration = moment(data.duree, "HH:mm").format("HHmm");
         service.commission = data.commission;
         service.picture = data.picture;
+        service.description = data.description;
         await service.save();
-        res.status(201).send(service);
+        return service;
     } 
     catch (error) {
-        next(error);
+        throw error;
     }
 };
 
-const getAllServices = async (req, res, next) => {
+const getAllServices = async (req, res) => {
     try {
         const services = await Service.find().exec();
-        res.status(200).send(services);
+        return services;
     }
     catch (error) {
-        next(error);
+        throw error;
     }
 }
 

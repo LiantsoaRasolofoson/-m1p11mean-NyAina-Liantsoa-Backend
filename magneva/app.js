@@ -11,10 +11,13 @@ var managerController = require('./controllers/manager.controller');
 var serviceController = require('./controllers/service.controller');
 var appointmentController = require('./controllers/appointment.controller');
 const cors = require("cors");
+const bodyParser = require('body-parser');
 
 var app = express();
 
 app.use(cors());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json({ limit: '5mb' }));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

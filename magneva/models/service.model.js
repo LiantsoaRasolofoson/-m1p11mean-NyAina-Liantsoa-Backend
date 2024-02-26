@@ -8,7 +8,14 @@ const Service = mongoose.model(
             price: Number,
             duration: Number,
             commission: Number,
-            picture: String
+            picture:  {
+                type: String,
+                default: ""
+            } ,
+            description: {
+                type: String,
+                default: ""
+            }   
         },
         { timestamps: true }
     )
