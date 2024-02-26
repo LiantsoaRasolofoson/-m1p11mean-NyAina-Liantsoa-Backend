@@ -20,9 +20,14 @@ router.post("/create", createAppointmentMiddlewares(), async (req, res, next) =>
     
 })
 
-router.get("/list", (req, res) => {
+router.get("/list", async (req, res, next) => {
     console.log("Get appointments");
-    appointmentService.getAppointments(req, res);
+    try{
+        res.status(201).send(await  appointmentService.getAppointments(req, res));
+    }catch(err){
+        next(err);
+    }
+  
 })
 
 module.exports = router;
