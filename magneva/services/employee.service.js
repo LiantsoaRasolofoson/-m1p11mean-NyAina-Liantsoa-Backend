@@ -6,6 +6,7 @@ const Service = db.service;
 const Salary = db.salary;
 const ServiceEmployee = db.serviceEmployee;
 const { signUp } = require("./auth.service");
+var bcrypt = require("bcryptjs");
 
 const createEmployee = async (req, res, next) => {
     try {
@@ -39,7 +40,7 @@ const getAllEmployees = async (req, res, next) => {
     }
 }
 
-const getEmployee = async (req, res, next) => {
+const getEmployee = async (req, res) => {
     const employeeID = req.params.employeeID;
     try {
         const employee = await ServiceEmployee.findOne({ employee: employeeID })
@@ -89,9 +90,103 @@ const addSalary = async (req, res) => {
     }
 }
 
+const isPasswordValid = (lastPassword, userPassword) => {
+    return bcrypt.compareSync(
+        lastPassword,
+        userPassword
+    );
+}
+
+const updatePassword = async (req, res) => {
+    const employeeID = req.params.employeeID;
+    try{
+        let data = req.body;
+        const employee = await User.findOne({_id: employeeID});
+        if(!employee) {
+            throw new HttpError("Cet(te) employé(e) n'existe pas", 400);
+        }
+        if(!isPasswordValid(data.lastPassword, employee.password)){
+            throw new HttpError("L'ancien mot de passe est incorrect", 400);
+        }
+        employee.password = bcrypt.hashSync(data.password, 8);
+        return await employee.save();
+    }
+    catch (error) {
+       throw error;
+    }
+}
+
+const getEmployeeByMail = async (email) => {
+    let user = await User.findOne({ email: email }).exec();
+    return user;
+}
+
+const updateProfil = async (req, res) => {
+    const employeeID = req.params.employeeID;
+    try{
+        let data = req.body;
+        const employee = await User.findOne({_id: employeeID});
+        if(!employee) {
+            throw new HttpError("Cet(te) employé(e) n'existe pas", 400);
+        }
+        const emp = await getEmployeeByMail(data.email);
+        if(emp && !emp._id.equals(employee._id) ){
+            throw new HttpError("Ce mail est déjà utilisé", 400);
+        }
+        employee.name = data.name;
+        employee.firstName = data.firstName;
+        employee.sex = data.sex;
+        employee.email = data.email;
+        employee.startDate = data.startDate;
+        employee.picture = data.picture;
+        employee.contact = data.contact;
+        return await employee.save();
+    }
+    catch (error) {
+       throw error;
+    }
+}
+
+const removeService = async (req, res) => {
+    let data = req.body;
+    try{
+        await ServiceEmployee.findOneAndUpdate(
+            { _id: data.serviceEmployeeID },
+            { $pull: { services: data.serviceID } },
+            { new: true }
+        );
+        return await getEmployee(req, res);
+    }
+    catch (error) {
+       throw error;
+    }
+}
+
+const addService = async (req, res) => {
+    try{
+        let data = req.body;
+        const serviceEmployee = await ServiceEmployee.findOneAndUpdate(
+            { _id: data.serviceEmployeeID , services: { $ne: data.serviceID  } },
+            { $addToSet: { services: data.serviceID  } },
+            { new: true }
+        );
+        if (!serviceEmployee) {
+            throw new HttpError("Ce service est déjà affecté à l'employé(e)", 400);
+        }
+        return await getEmployee(req, res);
+    }
+    catch (error) {
+       throw error;
+    }
+}
+
 module.exports = {
     createEmployee,
     getAllEmployees,
     getEmployee,
-    addSalary
+    addSalary,
+    updatePassword,
+    updateProfil,
+    removeService,
+    addService
 }
