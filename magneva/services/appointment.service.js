@@ -8,15 +8,18 @@ const HttpError = require('../httperror');
 const checkHour = async (date, hour) => {
     let openingHour = await OpeningHour.findOne({ day: date.getDay() }).exec();
     if(openingHour.isClosed || hour < openingHour.hourOpen || hour > openingHour.hourClose){
-        console.log('Desole mais nous sommes pas encore ouvert a cet heure');
+        throw new HttpError('Désolé, mais nous ne sommes pas encore ouverts à cette heure.', 400);
+    }
+
+    let currentTime = momentTimezone.tz('Indian/Antananarivo');
+    if(hour < currentTime.format("HHmm") && currentTime.format("YYYY-MM-DD") == convertToTimezoneDate(date)){
+        throw new HttpError('Veuillez choisir une heure exacte.', 400);
     }
 }
 
 const checkDate = (date) => {
-    let currentDate = momentTimezone.tz('Indian/Antananarivo').format("YYYY-MM-DD");
-    let timezoneDate = momentTimezone.tz(date, 'Indian/Antananarivo').format("YYYY-MM-DD");
-  
-    if(timezoneDate < currentDate){
+
+    if(convertToTimezoneDate(date) < getCurrentDate()){
         throw new HttpError("Veuillez choisir une date valide", 400);
     }
 }
@@ -30,7 +33,7 @@ const createAppointment = async (req, res) => {
         checkDate(data.date);
         await checkHour(data.date, data.hour);
     
-            //create the appointment
+        //create the appointment
         let appointment = new Appointment ({
             date : data.date,
             hour : data.hour,
@@ -40,10 +43,23 @@ const createAppointment = async (req, res) => {
        return appointment;   
 
     }catch(err){
-        throw new err;
+        throw err;
     }
 }
 
+const getAppointments = async (req, res) => {
+    return await Appointment.find({  user : req.query.userId });
+}
+
+const getCurrentDate = () => {
+    return momentTimezone.tz('Indian/Antananarivo').format("YYYY-MM-DD");
+}
+
+const convertToTimezoneDate = (date) => {
+    return  momentTimezone.tz(date, 'Indian/Antananarivo').format("YYYY-MM-DD");
+}
+
 module.exports = {
-    createAppointment
+    createAppointment,
+    getAppointments
 }
