@@ -40,17 +40,25 @@ router.get("/employee/list", employeeMiddlewares(),  async(req, res, next) => {
     }
 })
 
-router.get("/employee/detail/:employeeID", employeeMiddlewares(), async(req, res, next) => {
+router.post("/employee/addSalary", addSalaryMiddlewares(), async(req, res, next) => {
     try{
-        res.status(200).send(await employeeService.getEmployee(req, res));
+        res.status(201).send(await employeeService.addSalary(req, res));
     }catch(error){
         next(error);
     }
 })
 
-router.post("/employee/addSalary", addSalaryMiddlewares(), async(req, res, next) => {
+router.put("/employee/removeService/:employeeID", employeeMiddlewares(), async(req, res, next) => {
     try{
-        res.status(201).send(await employeeService.addSalary(req, res));
+        res.status(201).send(await employeeService.removeService(req, res));
+    }catch(error){
+        next(error);
+    }
+})
+
+router.put("/employee/addService/:employeeID", employeeMiddlewares(), async(req, res, next) => {
+    try{
+        res.status(201).send(await employeeService.addService(req, res));
     }catch(error){
         next(error);
     }
