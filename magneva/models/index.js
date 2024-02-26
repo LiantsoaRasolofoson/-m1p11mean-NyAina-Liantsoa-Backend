@@ -14,6 +14,7 @@ db.service = require("./service.model.js");
 db.serviceEmployee = require("./serviceEmployee.model.js");
 db.appointment = require("./appointment.model.js");
 db.appointmentDetails = require("./appointmentDetails.model.js");
+db.salary = require("./salary.model.js");
 
 db.ROLES = ["user", "employee", "admin"]
 

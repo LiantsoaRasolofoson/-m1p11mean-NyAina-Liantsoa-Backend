@@ -6,8 +6,18 @@ const { body } = require('express-validator');
 function createServiceMiddlewares(){
     return [
         body('name').notEmpty().withMessage('Nom requise'),
-        body('price').isNumeric().withMessage('Prix invalide'),
-        body('commission').isNumeric().withMessage('Commission invalide'),
+        body('price').isNumeric().withMessage('Prix invalide').custom(value => {
+            if (value < 0) {
+                throw new Error('Le prix ne peut pas être négatif');
+            }
+            return true;
+        }),
+        body('commission').isNumeric().withMessage('Commission invalide').custom(value => {
+            if (value < 0) {
+                throw new Error('La commission ne peut pas être négative');
+            }
+            return true;
+        }),
         body('picture').notEmpty().withMessage('Image requise'),
         body('description').notEmpty().withMessage('Description requise'),
         requestValidation.check

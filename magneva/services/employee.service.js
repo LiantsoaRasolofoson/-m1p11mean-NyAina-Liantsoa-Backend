@@ -3,6 +3,7 @@ const db = require("../models");
 const User = db.user;
 const Role = db.role;
 const Service = db.service;
+const Salary = db.salary;
 const ServiceEmployee = db.serviceEmployee;
 const { signUp } = require("./auth.service");
 
@@ -48,7 +49,40 @@ const getEmployee = async (req, res, next) => {
         if(!employee) {
             throw new HttpError("Cet(te) employé(e) n'existe pas", 400);
         }
-        return employee;  
+        const salary = await getSalary(employee);
+        const emp = {
+            info: employee,
+            salary: salary
+        };
+        return emp;  
+    }
+    catch (error) {
+       throw error;
+    }
+}
+
+const getSalary = async (employee) => {
+    try{
+        const salary = await Salary.findOne({employee: employee.employee._id})
+            .sort({ date: -1 })
+            .limit(1)
+        ;
+        return salary;
+    }
+    catch (error) {
+       throw error;
+    }
+}
+
+const addSalary = async (req, res) => {
+    const data = req.body;
+    try{
+        const salary = new Salary({
+            employee: data.employee,
+            amount: data.amount,
+            date: data.date
+        });
+        return await salary.save();
     }
     catch (error) {
        throw error;
@@ -58,5 +92,6 @@ const getEmployee = async (req, res, next) => {
 module.exports = {
     createEmployee,
     getAllEmployees,
-    getEmployee
+    getEmployee,
+    addSalary
 }
