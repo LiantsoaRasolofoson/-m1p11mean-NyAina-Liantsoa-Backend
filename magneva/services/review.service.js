@@ -1,6 +1,41 @@
+const HttpError = require('../httperror');
 const db = require('../models');
 const Service = db.service;
 const ServiceReview = db.serviceReview;
+const momentTimezone = require('moment-timezone');
+
+
+const createReview = async(data) => {
+    try{
+        data.date = momentTimezone.tz('Indian/Antananarivo').format("YYYY-MM-DD");
+        let review = new ServiceReview(data);
+        await review.save()
+        return review;
+    }catch(err){
+        throw err;
+    }
+}
+
+const getDataFor = async(serviceId, userId) => {
+    try{
+        //  get the appropriate service
+        let service = await Service.findOne({ _id : serviceId }).exec();
+        //  get all the reviews related to it
+        let serviceReviews = await ServiceReview.find({ service :  serviceId }).exec();
+        //  create a json response
+        let jsonResponse = {};
+        // add in the service + all the reviews + the userReview
+        jsonResponse.service = service;
+        jsonResponse.reviews = serviceReviews; 
+        jsonResponse.userReview = (userId) ? await ServiceReview.find({ user : userId }) : null;
+        // add the mean note
+        jsonResponse.note = getServiceMeanReview(serviceReviews);
+        return jsonResponse;
+    }catch(err){
+        throw err;
+    }
+}
+
 
 const getServicesWithReviews = async () => {
     //get all services
@@ -11,31 +46,32 @@ const getServicesWithReviews = async () => {
     for(let i=0; i < services.length; i++){
         let serviceReview = {};
         serviceReview.service = services[i];
-        serviceReview.note = await getServiceMeanReview(services[i]._id);
+        serviceReview.note = getServiceMeanReview(await ServiceReview.find({ service : services[i]._id }).exec());
         response.push(serviceReview);
     }
     // return the services
     return response;
 }
 
-const getServiceMeanReview = async (serviceId) => {
-    //get all service reviews
-    let serviceReviews = await ServiceReview.find({ service : serviceId }).exec();
+const getServiceMeanReview = (reviews) => {
     // if empty return 0
-    if(serviceReviews.length === 0){
+    if(reviews.length === 0){
         return 0;
     }
     //sum all the reviews divide by number of reviews
     let mean = 0;
-    for(const review in serviceReviews){
-        mean += review.note;
+    for(let i=0 ; i<reviews.length; i++){
+        console.log(reviews[i].note);
+        mean += reviews[i].note;
     }
     //return it 
     // en entier ou float ??
-    return mean/serviceReviews.length;
+    return mean/reviews.length;
 }
 
 
 module.exports = {
-    getServicesWithReviews
+    getServicesWithReviews,
+    createReview,
+    getDataFor
 }

@@ -18,6 +18,10 @@ const ServiceReview = mongoose.model(
                     ref: "Service"
                 }
             ,
+            description: {
+                type: String,
+                default: ""
+            },
             note: Number
         },
         { timestamps: true }
