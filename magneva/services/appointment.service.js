@@ -1,5 +1,6 @@
 const db = require("../models");
 const Appointment = db.appointment;
+const AppointmentDetails = db.appointmentDetails;
 const OpeningHour = db.openingHour;
 const moment = require('moment');
 const momentTimezone = require('moment-timezone');
@@ -59,7 +60,42 @@ const convertToTimezoneDate = (date) => {
     return  momentTimezone.tz(date, 'Indian/Antananarivo').format("YYYY-MM-DD");
 }
 
+const getAppointmentsByDate = async(date) => {
+    try{
+        let filter = {};
+        if(date){
+            filter.date = date.toISOString().split('T')[0];
+        }
+        const appointments = await Appointment.find(filter).exec();
+        return appointments;
+
+    }catch(error){
+        throw error;
+    }
+}
+
+const getAppointmentDetailByEmployee = async(date, employeeID, isFinished) => {
+    try{
+        const appointments = await getAppointmentsByDate(date);
+        const appointmentDetailID = appointments.flatMap(appointment => appointment.appointmentDetails.map(detail => detail._id));
+        let filter = {
+            _id: { $in: appointmentDetailID },
+            employee: employeeID
+        };
+        if( isFinished ){
+            filter.isFinished = 1;
+        }
+        const appointmentDetails = await AppointmentDetails.find(filter).populate('service').exec();
+        return appointmentDetails;
+    }
+    catch(error){
+        throw error;
+    }
+}
+
 module.exports = {
     createAppointment,
-    getAppointments
+    getAppointments,
+    getAppointmentsByDate,
+    getAppointmentDetailByEmployee
 }

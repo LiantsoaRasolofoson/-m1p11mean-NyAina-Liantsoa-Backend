@@ -6,6 +6,7 @@ const Service = db.service;
 const Salary = db.salary;
 const ServiceEmployee = db.serviceEmployee;
 const { signUp } = require("./auth.service");
+const { getAppointmentDetailByEmployee } = require("./appointment.service");
 var bcrypt = require("bcryptjs");
 
 const createEmployee = async (req, res, next) => {
@@ -33,7 +34,7 @@ const getAllEmployees = async (req, res, next) => {
     try {
         const role = await Role.findOne({ name: "employee" }).exec();
         const employees = await User.find({ roles: role._id }).exec();
-       return employees;
+        return employees;
     }
     catch (error) {
         throw error;
@@ -180,6 +181,31 @@ const addService = async (req, res) => {
     }
 }
 
+const taskAndCommission = async(req, res) => {
+    const employeeID = req.params.employeeID;
+    let commission = 0;
+    try{
+        const employee = await User.findOne({_id: employeeID});
+        if(!employee) {
+            throw new HttpError("Cet(te) employé(e) n'existe pas", 400);
+        }
+        date = new Date();
+        const appointmentDetails = await getAppointmentDetailByEmployee(date, employeeID, true);
+        appointmentDetails.forEach(appointmentDetail => {
+            commission += (appointmentDetail.service.price * appointmentDetail.service.commission)/100;
+        });
+        const data = {
+            appointmentDetails: appointmentDetails,
+            commission: commission
+        };
+        return data;
+    }
+    catch (error) {
+       throw error;
+    }
+}
+
+
 module.exports = {
     createEmployee,
     getAllEmployees,
@@ -188,5 +214,6 @@ module.exports = {
     updatePassword,
     updateProfil,
     removeService,
-    addService
+    addService,
+    taskAndCommission
 }
