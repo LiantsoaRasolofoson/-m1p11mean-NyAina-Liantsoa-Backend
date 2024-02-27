@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const ServiceReview = mongoose.model(
-    "ServiceReview",
+const Review = mongoose.model(
+    "Review",
     new Schema(
         {
             date: Date,
@@ -18,6 +18,12 @@ const ServiceReview = mongoose.model(
                     ref: "Service"
                 }
             ,
+            employee:
+                {
+                    type: Schema.Types.ObjectId,
+                    ref: "User"
+                }
+            ,
             description: {
                 type: String,
                 default: ""
@@ -28,4 +34,4 @@ const ServiceReview = mongoose.model(
     )
 ) 
 
-module.exports = ServiceReview;
+module.exports = Review;

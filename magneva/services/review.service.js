@@ -1,14 +1,16 @@
 const HttpError = require('../httperror');
 const db = require('../models');
+const employeeService = require('./employee.service');
 const Service = db.service;
-const ServiceReview = db.serviceReview;
+const User = db.user;
+const Review = db.review;
 const momentTimezone = require('moment-timezone');
 
 
 const createReview = async(data) => {
     try{
         data.date = momentTimezone.tz('Indian/Antananarivo').format("YYYY-MM-DD");
-        let review = new ServiceReview(data);
+        let review = new Review(data);
         await review.save()
         return review;
     }catch(err){
@@ -25,7 +27,7 @@ const createReview = async(data) => {
 const updateReview = async (data) => {
     try{
         //find the review and update
-        const review = await ServiceReview.findOneAndUpdate(
+        const review = await Review.findOneAndUpdate(
             { _id : data.reviewId }, 
             {
                 date : momentTimezone.tz('Indian/Antananarivo').format("YYYY-MM-DD"),
@@ -46,13 +48,13 @@ const getDataFor = async(serviceId, userId) => {
         //  get the appropriate service
         let service = await Service.findOne({ _id : serviceId }).exec();
         //  get all the reviews related to it
-        let serviceReviews = await ServiceReview.find({ service :  serviceId }).exec();
+        let serviceReviews = await Review.find({ service :  serviceId }).exec();
         //  create a json response
         let jsonResponse = {};
         // add in the service + all the reviews + the userReview
         jsonResponse.service = service;
         jsonResponse.reviews = serviceReviews; 
-        jsonResponse.userReview = (userId) ? await ServiceReview.find({ user : userId }) : null;
+        jsonResponse.userReview = (userId) ? await Review.find({ user : userId }) : null;
         // add the mean note
         jsonResponse.note = getServiceMeanReview(serviceReviews);
         return jsonResponse;
@@ -62,23 +64,28 @@ const getDataFor = async(serviceId, userId) => {
 }
 
 
-const getServicesWithReviews = async () => {
-    //get all services
-    let services = await Service.find().exec();
+//service or employee
+const getEntitiesWithReviews = async (entityName) => {
+    //get all entities
+    let entities = (entityName == "service") ? await Service.find().exec() : await employeeService.getValidEmployees()  ;
     //create json response var
     let response = [];
     //for each get the mean review and add it to the response
-    for(let i=0; i < services.length; i++){
-        let serviceReview = {};
-        serviceReview.service = services[i];
-        serviceReview.note = getServiceMeanReview(await ServiceReview.find({ service : services[i]._id }).exec());
-        response.push(serviceReview);
+    for(let i=0; i < entities.length; i++){
+        let entityReview = {};
+        let query = {};
+        query[entityName] =  entities[i]._id;
+        console.log(query);
+        entityReview.note = getServiceMeanReview(await Review.find(query).exec());
+        entityReview.entity = entities[i];
+        response.push(entityReview);
     }
     // return the services
     return response;
 }
 
 const getServiceMeanReview = (reviews) => {
+    console.log(reviews);
     // if empty return 0
     if(reviews.length === 0){
         return 0;
@@ -96,7 +103,7 @@ const getServiceMeanReview = (reviews) => {
 
 
 module.exports = {
-    getServicesWithReviews,
+    getEntitiesWithReviews,
     createReview,
     getDataFor,
     updateReview

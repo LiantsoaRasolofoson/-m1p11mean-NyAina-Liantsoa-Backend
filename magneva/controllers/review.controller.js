@@ -14,7 +14,15 @@ const checkReviewCreation = () => {
 
 router.get('/services', async (req, res, next) => {
     try{
-        res.status(200).send(await reviewService.getServicesWithReviews());
+        res.status(200).send(await reviewService.getEntitiesWithReviews("service"));
+    }catch(err){
+        next(err);
+    }
+})
+
+router.get('/employees', async (req, res, next) => {
+    try{
+        res.status(200).send(await reviewService.getEntitiesWithReviews("employee"));
     }catch(err){
         next(err);
     }

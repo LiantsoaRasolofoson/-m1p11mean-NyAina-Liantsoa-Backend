@@ -180,6 +180,20 @@ const addService = async (req, res) => {
     }
 }
 
+const getValidEmployees = async () => {
+    try {
+        const role = await Role.findOne({ name: "employee" }).exec();
+        const employees = await User.find({ 
+            roles: role._id,  
+            endDate: null
+        }).exec();
+       return employees;
+    }
+    catch (error) {
+        throw error;
+    } 
+}
+
 module.exports = {
     createEmployee,
     getAllEmployees,
@@ -188,5 +202,6 @@ module.exports = {
     updatePassword,
     updateProfil,
     removeService,
-    addService
+    addService,
+    getValidEmployees
 }
