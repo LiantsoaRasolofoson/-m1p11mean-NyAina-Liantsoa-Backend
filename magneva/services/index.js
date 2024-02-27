@@ -7,8 +7,11 @@ var dateTimeService = require("./datetime.service");
 var expenseService = require("./expense.service");
 var pieceService = require("./piece.service");
 var purchaseService = require("./purchase.service");
+var reviewService = require("./review.service");
+
 
 const service = {};
+
 service.authService = authService;
 service.employeeService = employeeService;
 service.serviceService = serviceService;
@@ -17,6 +20,8 @@ service.dateTimeService = dateTimeService;
 service.expenseService = expenseService;
 service.pieceService = pieceService;
 service.purchaseService = purchaseService;
+service.reviewService = reviewService;
+
 
 module.exports = service;
 
