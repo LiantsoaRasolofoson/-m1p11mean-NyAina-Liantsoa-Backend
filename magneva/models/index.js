@@ -19,6 +19,7 @@ db.expenseCategory = require("./expense-category.model.js");
 db.expense = require("./expense.model.js");
 db.piece = require("./piece.model.js");
 db.purchase = require("./purchase.model.js");
+db.serviceReview = require("./serviceReview.model.js");
 
 db.ROLES = ["user", "employee", "admin"]
 
