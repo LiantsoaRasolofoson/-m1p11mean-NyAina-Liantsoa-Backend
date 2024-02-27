@@ -29,6 +29,14 @@ router.post('/service', checkReviewCreation(), async (req, res, next) => {
 
 })
 
+router.put('/service', checkReviewCreation(), async (req, res, next) => {
+    try{
+        res.status(201).send(await reviewService.updateReview(req.body));
+    }catch(err){
+        next(err);
+    }
+})
+
 //get all the necessary datas for the front page details of a service
 router.get('/service/:serviceId', async(req, res, next) => {
     try{

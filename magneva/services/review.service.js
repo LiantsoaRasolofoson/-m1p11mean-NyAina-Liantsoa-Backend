@@ -16,6 +16,31 @@ const createReview = async(data) => {
     }
 }
 
+
+// {
+//     reviewId : xxx,
+//     note : 5,
+//     description
+// }
+const updateReview = async (data) => {
+    try{
+        //find the review and update
+        const review = await ServiceReview.findOneAndUpdate(
+            { _id : data.reviewId }, 
+            {
+                date : momentTimezone.tz('Indian/Antananarivo').format("YYYY-MM-DD"),
+                description : data.description ,
+                note : data.note
+            }, {
+            new: true
+        });          
+        return review
+    }catch(err){
+        throw err;
+    }
+
+}
+
 const getDataFor = async(serviceId, userId) => {
     try{
         //  get the appropriate service
@@ -73,5 +98,6 @@ const getServiceMeanReview = (reviews) => {
 module.exports = {
     getServicesWithReviews,
     createReview,
-    getDataFor
+    getDataFor,
+    updateReview
 }
