@@ -26,7 +26,4 @@ const AppointmentDetail = mongoose.model(
     )
 )
 
-
-
-
 module.exports = AppointmentDetail;

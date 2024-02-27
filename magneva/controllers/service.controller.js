@@ -41,6 +41,14 @@ router.get("/list", async (req, res, next) => {
     }
 });
 
+router.get("/:serviceId/employees", async(req, res, next) => {
+    try{
+        res.status(201).send(await serviceService.getEmployeesFor(req.params.serviceId));
+    }catch(error){
+        next(error);
+    }
+})
+
 router.get("/detail/:serviceID", async (req, res, next) => {
     try{
         res.status(201).send(await serviceService.getService(req, res));

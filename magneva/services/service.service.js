@@ -1,6 +1,8 @@
 const HttpError = require("../httperror");
 const db = require("../models");
 const Service = db.service;
+const ServiceEmployee = db.serviceEmployee;
+
 const moment = require('moment');
 
 const isDureeValid = (duree) => {
@@ -90,9 +92,23 @@ const getAllServices = async (req, res) => {
     }
 }
 
+const getEmployeesFor = async (serviceId) =>{
+    const employees = await ServiceEmployee.find({  
+        services: { $in: [serviceId] },
+        'employee.endDate' : null
+    }).select('_id employee')
+    
+    .populate({
+        path: 'employee',
+        select: 'name firstName _id'
+    }).exec();
+    return employees;
+}
+
 module.exports = {
     createService,
     getAllServices,
     updateService,
-    getService
+    getService,
+    getEmployeesFor
 }

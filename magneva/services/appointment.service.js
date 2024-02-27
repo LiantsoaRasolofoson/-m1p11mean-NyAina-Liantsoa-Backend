@@ -51,6 +51,10 @@ const getAppointments = async (req, res) => {
     return await Appointment.find({  user : req.query.userId });
 }
 
+const findById = async (id) => {
+    return await Appointment.findOne({ _id : id });
+}
+
 const getCurrentDate = () => {
     return momentTimezone.tz('Indian/Antananarivo').format("YYYY-MM-DD");
 }
@@ -61,5 +65,6 @@ const convertToTimezoneDate = (date) => {
 
 module.exports = {
     createAppointment,
-    getAppointments
+    getAppointments,
+    findById
 }
