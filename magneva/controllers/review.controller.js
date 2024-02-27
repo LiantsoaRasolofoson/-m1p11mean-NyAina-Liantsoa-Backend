@@ -66,7 +66,7 @@ router.post('/employee', checkReviewCreation(), async (req, res, next) => {
 // }
 router.put('/service', checkReviewCreation(), async (req, res, next) => {
     try{
-        res.status(201).send(await reviewService.updateReview(req.body));
+        res.status(200).send(await reviewService.updateReview(req.body));
     }catch(err){
         next(err);
     }
@@ -79,7 +79,7 @@ router.put('/service', checkReviewCreation(), async (req, res, next) => {
 // }
 router.put('/employee', checkReviewCreation(), async (req, res, next) => {
     try{
-        res.status(201).send(await reviewService.updateReview(req.body));
+        res.status(200).send(await reviewService.updateReview(req.body));
     }catch(err){
         next(err);
     }
@@ -89,10 +89,21 @@ router.put('/employee', checkReviewCreation(), async (req, res, next) => {
 //get all the necessary datas for the front page details of a service
 router.get('/service/:serviceId', async(req, res, next) => {
     try{
-        res.status(201).send(await reviewService.getDataFor(req.params.serviceId, req.query.userId));
+        res.status(200).send(await reviewService.getDataFor("service", req.params.serviceId, req.query.userId));
     }catch(err){
         next(err);
     }
 })
+
+//get all the necessary datas for the front page details of a service
+router.get('/employee/:employeeId', async(req, res, next) => {
+    try{
+        res.status(201).send(await reviewService.getDataFor("employee", req.params.employeeId, req.query.userId));
+    }catch(err){
+        next(err);
+    }
+})
+
+
 
 module.exports = router;

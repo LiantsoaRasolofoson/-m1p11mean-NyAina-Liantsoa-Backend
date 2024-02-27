@@ -42,20 +42,27 @@ const updateReview = async (data) => {
 
 }
 
-const getDataFor = async(serviceId, userId) => {
+const getDataFor = async(entityName, entityId, userId) => {
     try{
-        //  get the appropriate service
-        let service = await Service.findOne({ _id : serviceId }).exec();
+        //  get the appropriate entity
+        let entity = (entityName == "service" ) ? await Service.findOne({ _id : entityId }).exec() :  
+        await User.findOne({ _id : entityId }) ;
+        if(!entity){
+            throw new HttpError("Not found", 404);
+        }
         //  get all the reviews related to it
-        let serviceReviews = await Review.find({ service :  serviceId }).exec();
+        let query = {};
+        query[entityName] = entityId;
+        let reviews = await Review.find(query).exec();
         //  create a json response
         let jsonResponse = {};
-        // add in the service + all the reviews + the userReview
-        jsonResponse.service = service;
-        jsonResponse.reviews = serviceReviews; 
-        jsonResponse.userReview = (userId) ? await Review.find({ user : userId }) : null;
+        // add in the entity + all the reviews + the userReview
+        jsonResponse.entity = entity;
+        jsonResponse.reviews = reviews; 
+        query["user"] = userId;
+        jsonResponse.userReview = (userId) ? await Review.findOne(query) : null;
         // add the mean note
-        jsonResponse.note = getServiceMeanReview(serviceReviews);
+        jsonResponse.note = getServiceMeanReview(reviews);
         return jsonResponse;
     }catch(err){
         throw err;
