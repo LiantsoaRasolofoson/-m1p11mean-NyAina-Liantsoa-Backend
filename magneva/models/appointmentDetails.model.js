@@ -23,7 +23,15 @@ const AppointmentDetail = mongoose.model(
             isFinished: {
                 type: Number,
                 default: 0
-            }
+            },
+            client: {
+                type: Schema.Types.ObjectId,
+                ref: "User"
+            },
+            appointment: {
+                type: Schema.Types.ObjectId,
+                ref: "Appointment"
+            },
         },
         { timestamp: true }
     )

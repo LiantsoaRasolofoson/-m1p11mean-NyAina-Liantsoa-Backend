@@ -53,9 +53,17 @@ router.put("/updateProfil/:employeeID", updateProfilMiddlewares(), async(req, re
     }
 })
 
-router.get("/commission/:employeeID", employeeMiddlewares(), async(req, res, next) => {
+router.get("/finishTask/:appointmentDetailID", employeeMiddlewares(), async(req, res, next) => {
     try{
-        res.status(200).send(await employeeService.taskAndCommission(req, res));
+        res.status(200).send(await employeeService.finishTask(req, res));
+    }catch(error){
+        next(error);
+    }
+})
+
+router.get("/tasksOfDay/:employeeID", employeeMiddlewares(), async(req, res, next) => {
+    try{
+        res.status(200).send(await employeeService.getTasksOfDay(req, res));
     }catch(error){
         next(error);
     }

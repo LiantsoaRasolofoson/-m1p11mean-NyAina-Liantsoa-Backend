@@ -6,7 +6,7 @@ const Service = db.service;
 const Salary = db.salary;
 const ServiceEmployee = db.serviceEmployee;
 const { signUp } = require("./auth.service");
-const { getAppointmentDetailByEmployee } = require("./appointment.service");
+const { finishTaskEmployee, getTaskEmployee } = require("./appointment.service");
 var bcrypt = require("bcryptjs");
 
 const createEmployee = async (req, res, next) => {
@@ -181,24 +181,36 @@ const addService = async (req, res) => {
     }
 }
 
-const taskAndCommission = async(req, res) => {
+const finishTask = async(req, res) => {
+    try{
+        const appointmentDetail = await finishTaskEmployee(req, res);
+        return appointmentDetail;
+    }
+    catch(error){
+        throw error;
+    }
+}
+
+const getTasksOfDay = async(req, res) => {
     const employeeID = req.params.employeeID;
-    let commission = 0;
     try{
         const employee = await User.findOne({_id: employeeID});
         if(!employee) {
             throw new HttpError("Cet(te) employé(e) n'existe pas", 400);
         }
+        let commission = 0;
         date = new Date();
-        const appointmentDetails = await getAppointmentDetailByEmployee(date, employeeID, true);
-        appointmentDetails.forEach(appointmentDetail => {
-            commission += (appointmentDetail.service.price * appointmentDetail.service.commission)/100;
+        const tasksFinished = await getTaskEmployee(date, employeeID, 1);
+        const tasksNotFinished= await getTaskEmployee(date, employeeID, 0);
+        tasksFinished.forEach(task => {
+            commission += (task.service.commission * task.service.price)/100;
         });
-        const data = {
-            appointmentDetails: appointmentDetails,
+        const tasks = {
+            tasksFinished: tasksFinished,
+            tasksNotFinished: tasksNotFinished,
             commission: commission
-        };
-        return data;
+        }
+        return tasks;
     }
     catch (error) {
        throw error;
@@ -215,5 +227,6 @@ module.exports = {
     updateProfil,
     removeService,
     addService,
-    taskAndCommission
+    getTasksOfDay,
+    finishTask
 }

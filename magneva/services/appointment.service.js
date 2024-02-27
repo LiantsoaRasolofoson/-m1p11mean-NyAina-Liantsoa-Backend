@@ -60,33 +60,33 @@ const convertToTimezoneDate = (date) => {
     return  momentTimezone.tz(date, 'Indian/Antananarivo').format("YYYY-MM-DD");
 }
 
-const getAppointmentsByDate = async(date) => {
-    try{
-        let filter = {};
-        if(date){
-            filter.date = date.toISOString().split('T')[0];
-        }
-        const appointments = await Appointment.find(filter).exec();
-        return appointments;
-
-    }catch(error){
-        throw error;
-    }
+const getTaskEmployee = async(date, employeeID, isFinished) => {
+    let filter = {
+        employee: employeeID,
+        isFinished: isFinished
+    };
+    const tasks = await AppointmentDetails.find(filter)
+    .populate('service')
+    .populate('client')
+    .populate({
+        path: 'appointment',
+        match: { date: date.toISOString().split('T')[0] }
+    })
+    .sort({ hourBegin: 1 })
+    .exec();
+    return tasks;
 }
 
-const getAppointmentDetailByEmployee = async(date, employeeID, isFinished) => {
+const finishTaskEmployee = async(req, res) => {
+    const appointmentDetailID = req.params.appointmentDetailID;
     try{
-        const appointments = await getAppointmentsByDate(date);
-        const appointmentDetailID = appointments.flatMap(appointment => appointment.appointmentDetails.map(detail => detail._id));
-        let filter = {
-            _id: { $in: appointmentDetailID },
-            employee: employeeID
-        };
-        if( isFinished ){
-            filter.isFinished = 1;
+        const appointmentDetail = await AppointmentDetails.findOne({_id: appointmentDetailID}).exec();
+        if(!appointmentDetail) {
+            throw new HttpError("Cette tâche n'existe pas", 400);
         }
-        const appointmentDetails = await AppointmentDetails.find(filter).populate('service').exec();
-        return appointmentDetails;
+        appointmentDetail.isFinished = 1;
+        await appointmentDetail.save();
+        return appointmentDetail;
     }
     catch(error){
         throw error;
@@ -96,6 +96,6 @@ const getAppointmentDetailByEmployee = async(date, employeeID, isFinished) => {
 module.exports = {
     createAppointment,
     getAppointments,
-    getAppointmentsByDate,
-    getAppointmentDetailByEmployee
+    finishTaskEmployee,
+    getTaskEmployee
 }
