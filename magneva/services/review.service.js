@@ -53,14 +53,14 @@ const getDataFor = async(entityName, entityId, userId) => {
         //  get all the reviews related to it
         let query = {};
         query[entityName] = entityId;
-        let reviews = await Review.find(query).exec();
+        let reviews = await Review.find(query).populate('user', 'name firstName').exec();
         //  create a json response
         let jsonResponse = {};
         // add in the entity + all the reviews + the userReview
         jsonResponse.entity = entity;
         jsonResponse.reviews = reviews; 
         query["user"] = userId;
-        jsonResponse.userReview = (userId) ? await Review.findOne(query) : null;
+        jsonResponse.userReview = (userId) ? await Review.findOne(query).populate('user', 'name firstName').exec() : null;
         // add the mean note
         jsonResponse.note = getServiceMeanReview(reviews);
         return jsonResponse;
@@ -87,6 +87,12 @@ const getEntitiesWithReviews = async (entityName) => {
         response.push(entityReview);
     }
     // return the services
+    response.sort((a, b) => {
+        const dateA = new Date(a.entity.createdAt);
+        const dateB = new Date(b.entity.createdAt);
+      
+        return dateB - dateA;
+      });
     return response;
 }
 
