@@ -28,6 +28,13 @@ router.get('/employees', async (req, res, next) => {
     }
 })
 
+
+// {
+//     "description": "La service est top.",
+//     "note": "4",
+//     "user": "65d114b9694b16acf977652b",
+//     "service" : "65d200cf0d829e1159c1f4d7"
+// }
 router.post('/service', checkReviewCreation(), async (req, res, next) => {
     try{
         res.status(201).send(await reviewService.createReview(req.body));
@@ -37,6 +44,26 @@ router.post('/service', checkReviewCreation(), async (req, res, next) => {
 
 })
 
+
+// {
+//     "description": "La service est top.",
+//     "note": "4",
+//     "user": "65d114b9694b16acf977652b",
+//     "employee" : "65d200cf0d829e1159c1f4d7"
+// }
+router.post('/employee', checkReviewCreation(), async (req, res, next) => {
+    try{
+        res.status(201).send(await reviewService.createReview(req.body));
+    }catch(err){
+        next(err);
+    }
+})
+
+//{
+//     reviewId : xxx,
+//     note : 5,
+//     description
+// }
 router.put('/service', checkReviewCreation(), async (req, res, next) => {
     try{
         res.status(201).send(await reviewService.updateReview(req.body));
@@ -44,6 +71,20 @@ router.put('/service', checkReviewCreation(), async (req, res, next) => {
         next(err);
     }
 })
+
+//{
+//     reviewId : xxx,
+//     note : 5,
+//     description
+// }
+router.put('/employee', checkReviewCreation(), async (req, res, next) => {
+    try{
+        res.status(201).send(await reviewService.updateReview(req.body));
+    }catch(err){
+        next(err);
+    }
+})
+
 
 //get all the necessary datas for the front page details of a service
 router.get('/service/:serviceId', async(req, res, next) => {

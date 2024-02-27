@@ -6,7 +6,6 @@ const User = db.user;
 const Review = db.review;
 const momentTimezone = require('moment-timezone');
 
-
 const createReview = async(data) => {
     try{
         data.date = momentTimezone.tz('Indian/Antananarivo').format("YYYY-MM-DD");
