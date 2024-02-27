@@ -11,6 +11,10 @@ var managerController = require('./controllers/manager.controller');
 var serviceController = require('./controllers/service.controller');
 var appointmentController = require('./controllers/appointment.controller');
 var foPageController = require('./controllers/page_fo.controller');
+var employeeController = require('./controllers/employee.controller');
+var expenseController = require('./controllers/expense.controller');
+var pieceController = require('./controllers/piece.controller');
+var purchaseController = require('./controllers/purchase.controller');
 const cors = require("cors");
 const bodyParser = require('body-parser');
 
@@ -40,6 +44,10 @@ app.use('/manager', managerController);
 app.use('/service', serviceController);
 app.use('/appointment', appointmentController);
 app.use('/page-fo', foPageController);
+app.use('/employee', employeeController);
+app.use('/expense', expenseController);
+app.use('/piece', pieceController);
+app.use('/purchase', purchaseController);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

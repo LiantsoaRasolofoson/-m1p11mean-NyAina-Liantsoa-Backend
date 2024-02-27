@@ -24,11 +24,11 @@ router.post("/signin", signinMiddlewares(), async (req, res, next) => {
 
 function signUpMiddlewares(){
     return [
-        body('name').notEmpty().withMessage('Nom requise.'),
-        body('firstName').notEmpty().withMessage('Prenom requise'),
+        body('name').notEmpty().withMessage('Nom requis'),
+        body('firstName').notEmpty().withMessage('Prénom requis'),
         body('sex').notEmpty(),
-        body('password').notEmpty().withMessage('Mot de passe requise'),
-        body('email').isEmail().withMessage('Email requise'),
+        body('password').notEmpty().withMessage('Mot de passe requis'),
+        body('email').isEmail().withMessage('Email requis'),
         requestValidation.check
     ]
 }

@@ -1,5 +1,6 @@
 const db = require("../models");
 const Appointment = db.appointment;
+const AppointmentDetails = db.appointmentDetails;
 const OpeningHour = db.openingHour;
 const moment = require('moment');
 const momentTimezone = require('moment-timezone');
@@ -63,8 +64,43 @@ const convertToTimezoneDate = (date) => {
     return  momentTimezone.tz(date, 'Indian/Antananarivo').format("YYYY-MM-DD");
 }
 
+const getTaskEmployee = async(date, employeeID, isFinished) => {
+    let filter = {
+        employee: employeeID,
+        isFinished: isFinished
+    };
+    const tasks = await AppointmentDetails.find(filter)
+    .populate('service')
+    .populate('client')
+    .populate({
+        path: 'appointment',
+        match: { date: date.toISOString().split('T')[0] }
+    })
+    .sort({ hourBegin: 1 })
+    .exec();
+    return tasks;
+}
+
+const finishTaskEmployee = async(req, res) => {
+    const appointmentDetailID = req.params.appointmentDetailID;
+    try{
+        const appointmentDetail = await AppointmentDetails.findOne({_id: appointmentDetailID}).exec();
+        if(!appointmentDetail) {
+            throw new HttpError("Cette tâche n'existe pas", 400);
+        }
+        appointmentDetail.isFinished = 1;
+        await appointmentDetail.save();
+        return appointmentDetail;
+    }
+    catch(error){
+        throw error;
+    }
+}
+
 module.exports = {
     createAppointment,
     getAppointments,
-    findById
+    findById,
+    finishTaskEmployee,
+    getTaskEmployee
 }
