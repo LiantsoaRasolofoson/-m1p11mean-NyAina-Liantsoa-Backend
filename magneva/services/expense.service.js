@@ -60,7 +60,7 @@ const deleteExpense = async (req, res) => {
         if (!expense) {
             throw new HttpError("Cette dépense n'existe pas", 400);
         }
-        return expense;
+        return await getAllExpenses(req, res);
     } 
     catch (error) {
         throw error;
@@ -70,15 +70,22 @@ const deleteExpense = async (req, res) => {
 const getAllExpenses = async(req, res) => {
     try {
         let filter = {};
-        const { startDate, endDate, expenseCategoryName, expenseCategoryType } = req.body;
-        if(startDate && endDate) {
+        const { startDate, endDate, expenseCategoryName, expenseCategoryType } = req.query;
+        if (startDate && endDate) {
             filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+        } else if (startDate) {
+            filter.date = { $gte: new Date(startDate) };
+        } else if (endDate) {
+            filter.date = { $lte: new Date(endDate) };
         }
         if (expenseCategoryName) {
             filter["expenseCategory.name"] = new RegExp(expenseCategoryName, 'i');
         }
-        if (expenseCategoryType) {
-            filter["expenseCategory.type"] = expenseCategoryType;
+        if (expenseCategoryType !== null && expenseCategoryType !== '') {
+            const parsedExpenseCategoryType = parseInt(expenseCategoryType);
+            if (!isNaN(parsedExpenseCategoryType)) {
+                filter["expenseCategory.type"] = parsedExpenseCategoryType;
+            }
         }
         const expenses = await Expense.aggregate([
             {
@@ -94,6 +101,9 @@ const getAllExpenses = async(req, res) => {
             },
             {
                 $match: filter
+            },
+            {
+                $sort: { date: -1 }
             }
         ]);
         return expenses;

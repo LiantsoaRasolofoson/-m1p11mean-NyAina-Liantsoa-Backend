@@ -15,7 +15,8 @@ const Purchase = mongoose.model(
                     quantity: Number,
                     unitPrice: Number
                 }
-            ]
+            ],
+            totalAmount: Number
         },
         { timestamps: true }
     )

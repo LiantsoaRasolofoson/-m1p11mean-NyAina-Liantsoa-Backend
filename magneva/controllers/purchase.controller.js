@@ -34,4 +34,20 @@ router.get("/list", purchaseMiddlewares(), async(req, res, next) => {
     }
 })
 
+router.get("/detail/:purchaseID", purchaseMiddlewares(), async(req, res, next) => {
+    try{
+        res.status(200).send(await purchaseService.getPurchase(req, res));
+    }catch(error){
+        next(error);
+    }
+})
+
+router.delete("/delete/:purchaseID", purchaseMiddlewares(), async(req, res, next) => {
+    try{
+        res.status(200).send(await purchaseService.deletePurchase(req, res));
+    }catch(error){
+        next(error);
+    }
+})
+
 module.exports = router;
