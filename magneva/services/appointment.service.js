@@ -5,6 +5,8 @@ const OpeningHour = db.openingHour;
 const moment = require('moment');
 const momentTimezone = require('moment-timezone');
 const HttpError = require('../httperror');
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
 
 const checkHour = async (date, hour) => {
     let openingHour = await OpeningHour.findOne({ day: date.getDay() }).exec();
@@ -70,10 +72,42 @@ const getTaskEmployee = async(date, employeeID, isFinished) => {
     .populate('client')
     .populate({
         path: 'appointment',
-        match: { date: date.toISOString().split('T')[0] }
+        match: {
+            date: { 
+                $eq: date.toISOString().split('T')[0] // Filtrer les rendez-vous pour la date d'aujourd'hui
+            }
+        }
     })
     .sort({ hourBegin: 1 })
     .exec();
+
+    // .populate({
+    //     path: 'appointment',
+    //     match: { date: date.toISOString().split('T')[0] }
+    // })
+    // const tasks = await AppointmentDetails.aggregate([
+    //     {
+    //         $lookup: {
+    //             from: "appointments", // Le nom de la collection d'appointments
+    //             localField: "appointment",
+    //             foreignField: "_id",
+    //             as: "appointment"
+    //         }
+    //     },
+    //     {
+    //         $unwind: "$appointment"
+    //     },
+    //     {
+    //         $match: {
+    //             isFinished: 1,
+    //             employee: ObjectId("65dc447ccf95340c0db28eec")
+    //         }
+    //     },
+    //     {
+    //         $sort: { hourBegin: 1 }
+    //     }
+    // ]);
+    
     return tasks;
 }
 
@@ -81,8 +115,11 @@ const getAppointmentEmployee = async(employeeID, startDate, endDate, isFinished)
     let filter = {
         employee: employeeID
     };
-    if (isFinished) {
-        filter.isFinished = isFinished;
+    if (isFinished !== null && isFinished !== '') {
+        const parseIsFinished = parseInt(isFinished);
+        if (!isNaN(parseIsFinished)) {
+            filter.isFinished = parseIsFinished;
+        }
     };
     let dateFilter = {};
     if (startDate && endDate) {
