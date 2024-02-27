@@ -69,4 +69,12 @@ router.get("/tasksOfDay/:employeeID", employeeMiddlewares(), async(req, res, nex
     }
 })
 
+router.get("/listAppointment/:employeeID", employeeMiddlewares(), async(req, res, next) => {
+    try{
+        res.status(200).send(await employeeService.allAppointment(req, res));
+    }catch(error){
+        next(error);
+    }
+})
+
 module.exports = router;

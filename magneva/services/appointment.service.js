@@ -77,6 +77,33 @@ const getTaskEmployee = async(date, employeeID, isFinished) => {
     return tasks;
 }
 
+const getAppointmentEmployee = async(employeeID, startDate, endDate, isFinished) => {
+    let filter = {
+        employee: employeeID
+    };
+    if (isFinished) {
+        filter.isFinished = isFinished;
+    };
+    let dateFilter = {};
+    if (startDate && endDate) {
+        dateFilter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+    } else if (startDate) {
+        dateFilter.date = { $gte: new Date(startDate) };
+    } else if (endDate) {
+        dateFilter.date = { $lte: new Date(endDate) };
+    }
+    const appointments = await AppointmentDetails.find(filter)
+    .populate('service')
+    .populate('client')
+    .populate({
+        path: 'appointment',
+        match: dateFilter
+    })
+    .sort({ date: -1 })
+    .exec();
+    return appointments;
+}
+
 const finishTaskEmployee = async(req, res) => {
     const appointmentDetailID = req.params.appointmentDetailID;
     try{
@@ -97,5 +124,6 @@ module.exports = {
     createAppointment,
     getAppointments,
     finishTaskEmployee,
-    getTaskEmployee
+    getTaskEmployee,
+    getAppointmentEmployee
 }
