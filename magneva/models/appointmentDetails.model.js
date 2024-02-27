@@ -4,7 +4,6 @@ const Schema = mongoose.Schema;
 const AppointmentDetail = mongoose.model(
     "AppointmentDetail",
     new Schema(
-    
         {
             service: {
                 type: Schema.Types.ObjectId,
@@ -20,7 +19,19 @@ const AppointmentDetail = mongoose.model(
                 default: 0
             },
             hourBegin: Number,
-            hourEnd: Number
+            hourEnd: Number,
+            isFinished: {
+                type: Number,
+                default: 0
+            },
+            client: {
+                type: Schema.Types.ObjectId,
+                ref: "User"
+            },
+            appointment: {
+                type: Schema.Types.ObjectId,
+                ref: "Appointment"
+            },
         },
         { timestamp: true }
     )

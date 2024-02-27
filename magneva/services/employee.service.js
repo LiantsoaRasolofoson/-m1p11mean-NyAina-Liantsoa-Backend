@@ -6,6 +6,7 @@ const Service = db.service;
 const Salary = db.salary;
 const ServiceEmployee = db.serviceEmployee;
 const { signUp } = require("./auth.service");
+const { finishTaskEmployee, getTaskEmployee } = require("./appointment.service");
 var bcrypt = require("bcryptjs");
 
 const createEmployee = async (req, res, next) => {
@@ -33,7 +34,7 @@ const getAllEmployees = async (req, res, next) => {
     try {
         const role = await Role.findOne({ name: "employee" }).exec();
         const employees = await User.find({ roles: role._id }).exec();
-       return employees;
+        return employees;
     }
     catch (error) {
         throw error;
@@ -180,6 +181,43 @@ const addService = async (req, res) => {
     }
 }
 
+const finishTask = async(req, res) => {
+    try{
+        const appointmentDetail = await finishTaskEmployee(req, res);
+        return appointmentDetail;
+    }
+    catch(error){
+        throw error;
+    }
+}
+
+const getTasksOfDay = async(req, res) => {
+    const employeeID = req.params.employeeID;
+    try{
+        const employee = await User.findOne({_id: employeeID});
+        if(!employee) {
+            throw new HttpError("Cet(te) employé(e) n'existe pas", 400);
+        }
+        let commission = 0;
+        date = new Date();
+        const tasksFinished = await getTaskEmployee(date, employeeID, 1);
+        const tasksNotFinished= await getTaskEmployee(date, employeeID, 0);
+        tasksFinished.forEach(task => {
+            commission += (task.service.commission * task.service.price)/100;
+        });
+        const tasks = {
+            tasksFinished: tasksFinished,
+            tasksNotFinished: tasksNotFinished,
+            commission: commission
+        }
+        return tasks;
+    }
+    catch (error) {
+       throw error;
+    }
+}
+
+
 module.exports = {
     createEmployee,
     getAllEmployees,
@@ -188,5 +226,7 @@ module.exports = {
     updatePassword,
     updateProfil,
     removeService,
-    addService
+    addService,
+    getTasksOfDay,
+    finishTask
 }
