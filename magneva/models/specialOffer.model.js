@@ -12,7 +12,9 @@ const SpecialOffer = mongoose.model(
             percentage: Number,
             description: String,
             startDate: Date,
-            endDate: Date
+            endDate: Date,
+            hourBegin: Number,
+            hourEnd: Number
         },
         { timestamps: true }
     )

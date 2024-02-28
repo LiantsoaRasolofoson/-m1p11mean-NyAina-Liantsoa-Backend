@@ -60,7 +60,7 @@ router.get("/sendMailToClients/:specialOfferID", specialOfferMiddlewares(), asyn
 
 router.delete("/delete/:specialOfferID", specialOfferMiddlewares(), async (req, res, next) => {
     try{
-        res.status(201).send(specialOfferService.deleteSpecialOffer(req, res));
+        res.status(201).send(await specialOfferService.deleteSpecialOffer(req, res));
     }catch(error){
         next(error);
     }

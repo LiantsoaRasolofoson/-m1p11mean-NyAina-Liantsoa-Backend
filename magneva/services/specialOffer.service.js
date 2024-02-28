@@ -4,6 +4,7 @@ const User = db.user;
 const Role = db.role;
 const SpecialOffer = db.specialOffer;
 const { sendEmail } = require("./email.service");
+const moment = require('moment');
 
 const getAllClients = async (req, res) => {
     try {
@@ -20,8 +21,8 @@ const sendMailToClients = async (req, res) => {
     try{
         const specialOffer = await getSpecialOffer(req, res);
         text = "<p>Cher Client, </p><br/>";
-        text += specialOffer.description+"<br/>";
-        text += "<p>Cordialement, </p><br/><p><span>Magneva </span></p>";
+        text += "<p>"+specialOffer.description+"</p><br/>";
+        text += "<p>Cordialement, </p><br/><p><span style='color: blue'>Magneva </span></p><p><span style='color: blue'>034 86 158 50 </span></p>";
         const clients = await getAllClients(req, res);
         clients.forEach( (client)  => {
             to = client.email;
@@ -29,7 +30,7 @@ const sendMailToClients = async (req, res) => {
             text = text;
             sendEmail(to, subject, text);
         });
-        return true;
+        return specialOffer;
     }
     catch(error){
         throw error;
@@ -39,12 +40,17 @@ const sendMailToClients = async (req, res) => {
 const createSpecialOffer = async (req, res) => {
     let data = req.body;
     try {
+        console.log(data.startDate);
+        const start = data.startDate.split("T");
+        const end = data.endDate.split("T");
         const specialOffer = new SpecialOffer({
             service: data.service,
             percentage: data.percentage,
             description: data.description,
-            startDate: data.startDate,
-            endDate: data.endDate
+            startDate: start[0],
+            endDate: end[0],
+            hourBegin: moment(start[1], "HH:mm").format("HHmm"),
+            hourEnd: moment(end[1], "HH:mm").format("HHmm")
         });
         await specialOffer.save();
         return specialOffer; 
