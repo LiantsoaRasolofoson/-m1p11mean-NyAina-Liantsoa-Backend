@@ -199,7 +199,7 @@ const getTasksOfDay = async(req, res) => {
             throw new HttpError("Cet(te) employé(e) n'existe pas", 400);
         }
         let commission = 0;
-        date = new Date("2024-02-29");
+        date = new Date();
         const tasksFinished = await getTaskEmployee(date, employeeID, 1);
         const tasksNotFinished= await getTaskEmployee(date, employeeID, 0);
         tasksFinished.forEach(task => {
