@@ -6,7 +6,7 @@ var expenseService = require("./expense.service");
 var pieceService = require("./piece.service");
 var purchaseService = require("./purchase.service");
 var reviewService = require("./review.service");
-
+var hourlyEmployeeService = require("./hourlyEmployee.service");
 var emailService = require("./email.service");
 var specialOfferService = require("./specialOffer.service");
 
@@ -20,7 +20,7 @@ service.expenseService = expenseService;
 service.pieceService = pieceService;
 service.purchaseService = purchaseService;
 service.reviewService = reviewService;
-
+service.hourlyEmployeeService = hourlyEmployeeService;
 service.emailService = emailService;
 service.specialOfferService = specialOfferService;
 

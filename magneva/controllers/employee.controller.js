@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const { requestValidation } = require('../middlewares');
-const { employeeService } = require('../services');
+const { employeeService, hourlyEmployeeService } = require('../services');
 const { body } = require('express-validator');
 
 function updatePasswordMiddlewares(){
@@ -72,6 +72,42 @@ router.get("/tasksOfDay/:employeeID", employeeMiddlewares(), async(req, res, nex
 router.get("/listAppointment/:employeeID", employeeMiddlewares(), async(req, res, next) => {
     try{
         res.status(200).send(await employeeService.allAppointment(req, res));
+    }catch(error){
+        next(error);
+    }
+})
+
+// Horaire de Travail
+function createHourlyMiddlewares(){
+    return [
+        body('employee').notEmpty().withMessage('Employé requis.'),
+        body('day').notEmpty().withMessage('Jour de la semaine requis'),
+        body('nameDay').notEmpty().withMessage('Jour de la semaine requis'),
+        body('hourStart').notEmpty().withMessage('Heure début requise'),
+        body('hourEnd').notEmpty().withMessage('Heure fin requise'),
+        requestValidation.check
+    ]
+}
+
+router.post("/hourly/create", createHourlyMiddlewares(), async(req, res, next) => {
+    try{
+        res.status(201).send(await hourlyEmployeeService.createHourlyEmployee(req, res));
+    }catch(error){
+        next(error);
+    }
+})
+
+router.get("/hourly/list/:employeeID", async(req, res, next) => {
+    try{
+        res.status(201).send(await hourlyEmployeeService.allHourly(req, res));
+    }catch(error){
+        next(error);
+    }
+})
+
+router.delete("/hourly/delete/:hourlyID", async(req, res, next) => {
+    try{
+        res.status(201).send(await hourlyEmployeeService.deleteHourly(req, res));
     }catch(error){
         next(error);
     }
