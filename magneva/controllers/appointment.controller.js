@@ -21,9 +21,8 @@ router.post("/create", createAppointmentMiddlewares(), async (req, res, next) =>
 })
 
 router.get("/list", async (req, res, next) => {
-    console.log("Get appointments");
     try{
-        res.status(200).send(await  appointmentService.getAppointments(req, res));
+        res.status(200).send(await appointmentService.getAppointments(req.body));
     }catch(err){
         next(err);
     }
