@@ -1,5 +1,6 @@
 var dbConfig = require("../config/db.config.js");
 var mongoose = require("mongoose");
+const AppointmentView = require("./appointment.view.js");
 
 mongoose.Promise = global.Promise
 
@@ -21,6 +22,7 @@ db.piece = require("./piece.model.js");
 db.purchase = require("./purchase.model.js");
 db.review = require("./review.model.js");
 db.specialOffer = require("./specialOffer.model.js");
+db.appointmentView = require("./appointment.view.js");
 
 db.ROLES = ["user", "employee", "admin"]
 

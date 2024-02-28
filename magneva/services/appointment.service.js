@@ -2,6 +2,7 @@ const db = require("../models");
 const Appointment = db.appointment;
 const AppointmentDetail = db.appointmentDetails;
 const OpeningHour = db.openingHour;
+const AppointmentView = db.appointmentView;
 const Service = db.service;
 const ServiceEmployee = db.serviceEmployee;
 const moment = require('moment');
@@ -52,9 +53,9 @@ const createAppointment = async (data) => {
         await appointment.save();
 
         let hourBegin = data.hour;
+        let sumPrice = 0;
         let details = [];
         for(let i=0; i < data.services.length; i++ ){
-            
             let tmp = new AppointmentDetail ({
                 service : data.services[i].entity._id,
                 employee : data.services[i].employee.entity._id,
@@ -67,13 +68,14 @@ const createAppointment = async (data) => {
             })
             hourBegin = hourBegin + parseInt(data.services[i].entity.duration);
             await tmp.save();
+            sumPrice += parseInt(tmp.price) * (1 + tmp.reduction / 100) ; // add the reduction
             details.push(tmp);
         }
 
+        appointment.sumPrice = sumPrice;
         appointment.appointmentDetails = details;
         await session.commitTransaction();
         await appointment.save();
-        console.log('Appointment saved');
        return appointment;   
     }catch(err){
         console.log('Aborting');
@@ -86,8 +88,57 @@ const createAppointment = async (data) => {
     }
 }
 
-const getAppointments = async (req, res) => {
-    return await Appointment.find({  user : req.query.userId });
+//minPrice
+//maxPrice
+//startDate
+//endDate
+//startHour
+//endHour
+//page
+const getAppointments = async (query) => {
+    const searchCriteria = {};
+    let jsonResponse = {};
+
+    if(query.user && query.user.trim() ){
+        searchCriteria['user'] = { $regex: query.user.trim(), $options: 'i' };
+    }
+
+    if(query.minDate && query.minDate.trim()) {
+        searchCriteria['date'] = { $gte: query.minDate }
+    }
+
+    if(query.maxDate && query.maxDate.trim()){
+        searchCriteria['date'] = { ...searchCriteria['date'], $lte: query.maxDate }
+    }
+
+    if(query.minHour && query.minHour.trim()){
+        searchCriteria['hour'] = { $gte: moment(query.minHour, "HH:mm").format("HHmm") };
+    }
+
+    if(query.maxHour && query.maxHour.trim() ){
+        searchCriteria['hour'] = { ...searchCriteria['hour'], $lte: moment(query.maxHour, "HH:mm").format("HHmm") };
+    }
+
+    if (query.minPrice && query.minPrice.trim()) {
+        searchCriteria['sumPrice'] = { $gte: parseInt(query.minPrice) };
+    }
+
+    if (query.maxPrice && query.maxPrice.trim()) {
+        searchCriteria['sumPrice'] = { ...searchCriteria['sumPrice'], $lte: parseInt(query.maxPrice) };
+    }
+      
+    if(query.isPaid && query.isPaid.trim() ){
+        searchCriteria['isPaid'] = false;
+    }
+    console.log(searchCriteria);
+
+    jsonResponse.entities = await AppointmentView.find(searchCriteria)
+    .skip((query.page - 1) * query.pageSize)
+    .limit(query.pageSize)
+    .exec();
+    jsonResponse.count = await AppointmentView.countDocuments(searchCriteria).exec();
+
+    return jsonResponse;
 }
 
 const getCurrentDate = () => {

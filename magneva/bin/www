@@ -9,8 +9,6 @@ var debug = require('debug')('magneva:server');
 var http = require('http');
 const db = require("../models");
 
-
-
 /**
  * Connect to mongoose
 */
