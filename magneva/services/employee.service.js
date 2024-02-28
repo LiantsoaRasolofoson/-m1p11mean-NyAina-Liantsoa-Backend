@@ -6,7 +6,7 @@ const Service = db.service;
 const Salary = db.salary;
 const ServiceEmployee = db.serviceEmployee;
 const { signUp } = require("./auth.service");
-const { finishTaskEmployee, getTaskEmployee } = require("./appointment.service");
+const { finishTaskEmployee, getTaskEmployee, getAppointmentEmployee } = require("./appointment.service");
 var bcrypt = require("bcryptjs");
 
 const createEmployee = async (req, res, next) => {
@@ -217,6 +217,22 @@ const getTasksOfDay = async(req, res) => {
     }
 }
 
+const allAppointment = async(req, res) => {
+    const employeeID = req.params.employeeID;
+    try{
+        const employee = await User.findOne({_id: employeeID});
+        if(!employee) {
+            throw new HttpError("Cet(te) employé(e) n'existe pas", 400);
+        };
+        const { startDate, endDate, isFinished } = req.query;
+        const appointments = await getAppointmentEmployee(employeeID, startDate, endDate, isFinished);
+        return appointments;
+    }
+    catch (error) {
+       throw error;
+    }
+}
+
 
 const getValidEmployees = async () => {
     try {
@@ -243,5 +259,6 @@ module.exports = {
     addService,
     getTasksOfDay,
     finishTask,
-    getValidEmployees
+    getValidEmployees,
+    allAppointment
 }

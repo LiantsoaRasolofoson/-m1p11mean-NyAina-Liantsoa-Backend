@@ -5,6 +5,8 @@ const OpeningHour = db.openingHour;
 const moment = require('moment');
 const momentTimezone = require('moment-timezone');
 const HttpError = require('../httperror');
+const mongoose = require("mongoose");
+const ObjectId = mongoose.Types.ObjectId;
 
 const checkHour = async (date, hour) => {
     let openingHour = await OpeningHour.findOne({ day: date.getDay() }).exec();
@@ -68,13 +70,47 @@ const getTaskEmployee = async(date, employeeID, isFinished) => {
     const tasks = await AppointmentDetails.find(filter)
     .populate('service')
     .populate('client')
-    .populate({
-        path: 'appointment',
-        match: { date: date.toISOString().split('T')[0] }
-    })
+    .populate('appointment')
     .sort({ hourBegin: 1 })
     .exec();
-    return tasks;
+
+    const filteredTasks = tasks.filter(task => 
+        task.appointment && task.appointment.date.toISOString().split('T')[0] === date.toISOString().split('T')[0]
+    );
+
+    return filteredTasks;
+}
+
+const getAppointmentEmployee = async(employeeID, startDate, endDate, isFinished) => {
+    let filter = {
+        employee: employeeID
+    };
+    if (isFinished !== null && isFinished !== '') {
+        const parseIsFinished = parseInt(isFinished);
+        if (!isNaN(parseIsFinished)) {
+            filter.isFinished = parseIsFinished;
+        }
+    };
+    const appointments = await AppointmentDetails.find(filter)
+    .populate('service')
+    .populate('client')
+    .populate('appointment')
+    .sort({ date: -1 })
+    .exec();
+    const filteredRDV = appointments.filter(appointment => {
+        const appointmentDate = appointment.appointment && appointment.appointment.date;
+        if (appointmentDate) {
+            if (startDate && endDate) {
+                return appointmentDate >= new Date(startDate) && appointmentDate <= new Date(endDate);
+            } else if (startDate) {
+                return appointmentDate >= new Date(startDate);
+            } else if (endDate) {
+                return appointmentDate <= new Date(endDate);
+            }
+        }
+        return true;
+    });
+    return filteredRDV;
 }
 
 const finishTaskEmployee = async(req, res) => {
@@ -97,5 +133,6 @@ module.exports = {
     createAppointment,
     getAppointments,
     finishTaskEmployee,
-    getTaskEmployee
+    getTaskEmployee,
+    getAppointmentEmployee
 }
