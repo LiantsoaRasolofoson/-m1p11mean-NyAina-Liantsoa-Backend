@@ -18,6 +18,7 @@ const AppointmentDetail = mongoose.model(
                 type: Number,
                 default: 0
             },
+            date: Date,
             hourBegin: Number,
             hourEnd: Number,
             isFinished: {

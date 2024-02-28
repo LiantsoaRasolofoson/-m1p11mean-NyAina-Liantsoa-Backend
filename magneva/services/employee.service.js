@@ -20,7 +20,7 @@ const createEmployee = async (req, res, next) => {
             employee: user._id
         });
         console.log("Etttt");
-        services = await Service.find({ _id: { $in: data.services } }).exec();
+        let services = await Service.find({ _id: { $in: data.services } }).exec();
         serviceEmployee.services = services.map(service => service._id);
         await serviceEmployee.save();
         return serviceEmployee;
