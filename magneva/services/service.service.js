@@ -90,9 +90,14 @@ const getAllServices = async (req, res) => {
     }
 }
 
+const getReduction = (req, res) => {
+    return 0;
+}
+
 module.exports = {
     createService,
     getAllServices,
     updateService,
-    getService
+    getService,
+    getReduction
 }

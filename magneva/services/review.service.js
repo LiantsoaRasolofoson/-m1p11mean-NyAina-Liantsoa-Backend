@@ -73,7 +73,7 @@ const getDataFor = async(entityName, entityId, userId) => {
 //service or employee
 const getEntitiesWithReviews = async (entityName) => {
     //get all entities
-    let entities = (entityName == "service") ? await Service.find().exec() : await employeeService.getValidEmployees()  ;
+    let entities = (entityName == "service") ? await Service.find().exec() : await employeeService.getValidEmployees();
     //create json response var
     let response = [];
     //for each get the mean review and add it to the response
@@ -81,7 +81,6 @@ const getEntitiesWithReviews = async (entityName) => {
         let entityReview = {};
         let query = {};
         query[entityName] =  entities[i]._id;
-        console.log(query);
         entityReview.note = getServiceMeanReview(await Review.find(query).exec());
         entityReview.entity = entities[i];
         response.push(entityReview);
@@ -97,7 +96,6 @@ const getEntitiesWithReviews = async (entityName) => {
 }
 
 const getServiceMeanReview = (reviews) => {
-    console.log(reviews);
     // if empty return 0
     if(reviews.length === 0){
         return 0;
@@ -105,7 +103,6 @@ const getServiceMeanReview = (reviews) => {
     //sum all the reviews divide by number of reviews
     let mean = 0;
     for(let i=0 ; i<reviews.length; i++){
-        console.log(reviews[i].note);
         mean += reviews[i].note;
     }
     //return it 
