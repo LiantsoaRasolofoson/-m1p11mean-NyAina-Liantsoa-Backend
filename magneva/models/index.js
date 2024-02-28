@@ -24,6 +24,12 @@ db.review = require("./review.model.js");
 db.specialOffer = require("./specialOffer.model.js");
 db.hourlyEmployee = require("./hourlyEmployee.model.js");
 db.appointmentView = require("./appointment.view.js");
+db.expenseView = require("./expense.view.js");
+db.purchaseView = require("./purchase.view.js");
+db.payment = require("./payment.model.js");
+db.statAppointment = require("./statAppointment.view.js");
+db.chiffreAffaire = require("./chiffreAffaire.view.js");
+
 
 db.ROLES = ["user", "employee", "admin"]
 
