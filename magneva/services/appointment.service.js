@@ -70,45 +70,15 @@ const getTaskEmployee = async(date, employeeID, isFinished) => {
     const tasks = await AppointmentDetails.find(filter)
     .populate('service')
     .populate('client')
-    .populate({
-        path: 'appointment',
-        match: {
-            date: { 
-                $eq: date.toISOString().split('T')[0] // Filtrer les rendez-vous pour la date d'aujourd'hui
-            }
-        }
-    })
+    .populate('appointment')
     .sort({ hourBegin: 1 })
     .exec();
 
-    // .populate({
-    //     path: 'appointment',
-    //     match: { date: date.toISOString().split('T')[0] }
-    // })
-    // const tasks = await AppointmentDetails.aggregate([
-    //     {
-    //         $lookup: {
-    //             from: "appointments", // Le nom de la collection d'appointments
-    //             localField: "appointment",
-    //             foreignField: "_id",
-    //             as: "appointment"
-    //         }
-    //     },
-    //     {
-    //         $unwind: "$appointment"
-    //     },
-    //     {
-    //         $match: {
-    //             isFinished: 1,
-    //             employee: ObjectId("65dc447ccf95340c0db28eec")
-    //         }
-    //     },
-    //     {
-    //         $sort: { hourBegin: 1 }
-    //     }
-    // ]);
-    
-    return tasks;
+    const filteredTasks = tasks.filter(task => 
+        task.appointment && task.appointment.date.toISOString().split('T')[0] === date.toISOString().split('T')[0]
+    );
+
+    return filteredTasks;
 }
 
 const getAppointmentEmployee = async(employeeID, startDate, endDate, isFinished) => {
@@ -121,24 +91,26 @@ const getAppointmentEmployee = async(employeeID, startDate, endDate, isFinished)
             filter.isFinished = parseIsFinished;
         }
     };
-    let dateFilter = {};
-    if (startDate && endDate) {
-        dateFilter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
-    } else if (startDate) {
-        dateFilter.date = { $gte: new Date(startDate) };
-    } else if (endDate) {
-        dateFilter.date = { $lte: new Date(endDate) };
-    }
     const appointments = await AppointmentDetails.find(filter)
     .populate('service')
     .populate('client')
-    .populate({
-        path: 'appointment',
-        match: dateFilter
-    })
+    .populate('appointment')
     .sort({ date: -1 })
     .exec();
-    return appointments;
+    const filteredRDV = appointments.filter(appointment => {
+        const appointmentDate = appointment.appointment && appointment.appointment.date;
+        if (appointmentDate) {
+            if (startDate && endDate) {
+                return appointmentDate >= new Date(startDate) && appointmentDate <= new Date(endDate);
+            } else if (startDate) {
+                return appointmentDate >= new Date(startDate);
+            } else if (endDate) {
+                return appointmentDate <= new Date(endDate);
+            }
+        }
+        return true;
+    });
+    return filteredRDV;
 }
 
 const finishTaskEmployee = async(req, res) => {
