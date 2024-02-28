@@ -1,13 +1,6 @@
+const HttpError = require("../httperror");
 const nodemailer = require('nodemailer');
 
-// host: "smtp.gmail.com",
-    // secureConnection: false,
-    // port:587,
-    // secure: true,
-    // auth: {
-    //     user: 'liantsoarasolofoson@gmail.com',
-    //     pass: 'kospadyufathfqlg'
-    // },
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -19,29 +12,27 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-const sendEmail = async (to, subject, text) => {
-  const mailOptions = {
-    from: "liantsoarasolofoson@gmail.com",
-    to: to,
-    subject: subject,
-    text: text
-  };
+const sendEmail = (to, subject, text) => {
   try {
-    await transporter.sendMail(mailOptions, (error, info)  => {
-        if(error){
-            console.log('Error :', error);
-        }else{
-            console.log('E-mail envoyé avec succès :', info.response);
-        }
+    const mailOptions = {
+      from: "liantsoarasolofoson@gmail.com",
+      to: to,
+      subject: subject,
+      html: text
+    };
+    transporter.sendMail(mailOptions, (error, info)  => {
+      if(error){
+        throw new HttpError("Erreur lors de l'envoie d'email: "+error, 400);
+      }
     });
   } 
   catch (error) {
-    console.error('Erreur lors de l\'envoi de l\'e-mail :', error);
+    throw error;
   }
 }
 
 module.exports = {
-    sendEmail
+  sendEmail
 }
 
   
