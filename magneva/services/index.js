@@ -7,6 +7,8 @@ var pieceService = require("./piece.service");
 var purchaseService = require("./purchase.service");
 var reviewService = require("./review.service");
 
+var emailService = require("./email.service");
+var specialOfferService = require("./specialOffer.service");
 
 const service = {};
 
@@ -19,6 +21,8 @@ service.pieceService = pieceService;
 service.purchaseService = purchaseService;
 service.reviewService = reviewService;
 
+service.emailService = emailService;
+service.specialOfferService = specialOfferService;
 
 module.exports = service;
 

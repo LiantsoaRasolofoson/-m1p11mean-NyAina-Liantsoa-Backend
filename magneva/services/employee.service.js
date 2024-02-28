@@ -30,7 +30,7 @@ const createEmployee = async (req, res, next) => {
     }
 };
 
-const getAllEmployees = async (req, res, next) => {
+const getAllEmployees = async (req, res) => {
     try {
         const role = await Role.findOne({ name: "employee" }).exec();
         const employees = await User.find({ roles: role._id }).exec();
