@@ -1,10 +1,13 @@
 const db = require("../models");
 const Appointment = db.appointment;
-const AppointmentDetails = db.appointmentDetails;
+const AppointmentDetail = db.appointmentDetails;
 const OpeningHour = db.openingHour;
+const Service = db.service;
+const ServiceEmployee = db.serviceEmployee;
 const moment = require('moment');
 const momentTimezone = require('moment-timezone');
 const HttpError = require('../httperror');
+const serviceService = require('./service.service');
 
 const checkHour = async (date, hour) => {
     let openingHour = await OpeningHour.findOne({ day: date.getDay() }).exec();
@@ -25,26 +28,61 @@ const checkDate = (date) => {
     }
 }
 
-const createAppointment = async (req, res) => {
-    let data = req.body;
+const createAppointment = async (data) => {
+    // TODO: Wrap in a transaction
     data.date = new Date(data.date);
     data.hour = moment(data.hour, "HH:mm").format("HHmm");
-
+    let session;
     try{
+        // Using Mongoose's default connection
+        session = await db.mongoose.startSession();
+        console.log(session);
+
         checkDate(data.date);
         await checkHour(data.date, data.hour);
-    
+        
+        session.startTransaction();
         //create the appointment
+        console.log('create appointment');
         let appointment = new Appointment ({
             date : data.date,
             hour : data.hour,
             user: data.userId
         })
         await appointment.save();
-       return appointment;   
 
+        let hourBegin = data.hour;
+        let details = [];
+        for(let i=0; i < data.services.length; i++ ){
+            
+            let tmp = new AppointmentDetail ({
+                service : data.services[i].entity._id,
+                employee : data.services[i].employee.entity._id,
+                price : data.services[i].entity.price,
+                reduction : serviceService.getReduction(),
+                hourBegin : hourBegin,
+                hourEnd : hourBegin + parseInt(data.services[i].entity.duration),
+                client : data.userId ,
+                appointment : appointment._id
+            })
+            hourBegin = hourBegin + parseInt(data.services[i].entity.duration);
+            await tmp.save();
+            details.push(tmp);
+        }
+
+        appointment.appointmentDetails = details;
+        await session.commitTransaction();
+        await appointment.save();
+        console.log('Appointment saved');
+       return appointment;   
     }catch(err){
+        console.log('Aborting');
+        await session.abortTransaction();
         throw err;
+    }finally{
+        console.log('End session');
+        console.log(session);
+        await session.endSession();
     }
 }
 
@@ -65,7 +103,7 @@ const getTaskEmployee = async(date, employeeID, isFinished) => {
         employee: employeeID,
         isFinished: isFinished
     };
-    const tasks = await AppointmentDetails.find(filter)
+    const tasks = await AppointmentDetail.find(filter)
     .populate('service')
     .populate('client')
     .populate({
@@ -93,9 +131,35 @@ const finishTaskEmployee = async(req, res) => {
     }
 }
 
+const mapEmployeesByService = async (emps) => {
+    let result = {};
+    let services = await Service.find({}).exec();
+    //init the result
+    for(let i = 0; i < services.length; i++){
+        result[services[i]._id] = [];
+    }
+
+    for(let i = 0; i < emps.length; i++){
+        //get all the emps services
+        let empServices = (await ServiceEmployee.findOne({ employee : emps[i].entity._id}).exec()).services;
+        for(let j=0 ; j < empServices.length; j++){
+           result[empServices[j]].push(emps[i]);
+        }
+    }
+    return result;
+}
+
+const getCreateDatas = async (services, employees) => {
+    let jsonResponse = {};
+    jsonResponse.services = services;
+    jsonResponse.employees = await mapEmployeesByService(employees);
+    return jsonResponse;
+}
+
 module.exports = {
     createAppointment,
     getAppointments,
     finishTaskEmployee,
-    getTaskEmployee
+    getTaskEmployee,
+    getCreateDatas
 }
