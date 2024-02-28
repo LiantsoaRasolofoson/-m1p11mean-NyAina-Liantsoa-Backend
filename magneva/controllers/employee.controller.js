@@ -99,7 +99,8 @@ router.post("/hourly/create", createHourlyMiddlewares(), async(req, res, next) =
 
 router.get("/hourly/list/:employeeID", async(req, res, next) => {
     try{
-        res.status(201).send(await hourlyEmployeeService.allHourly(req, res));
+        const employeeID = req.params.employeeID;
+        res.status(201).send(await hourlyEmployeeService.allHourly(employeeID));
     }catch(error){
         next(error);
     }

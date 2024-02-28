@@ -53,8 +53,7 @@ const createHourlyEmployee = async (req, res) => {
     }
 };
 
-const allHourly = async (req, res) => {
-    const employeeID = req.params.employeeID;
+const allHourly = async (employeeID) => {
     try {
         const hourly = await HourlyEmployee.find({ 
             employee: employeeID 
@@ -76,7 +75,7 @@ const deleteHourly = async (req, res) => {
         if (!hourly) {
             throw new HttpError("Cette horaire de travail n'existe pas", 400);
         }
-        return hourly;
+        return await allHourly(hourly.employee);
     } 
     catch (error) {
         throw error;
