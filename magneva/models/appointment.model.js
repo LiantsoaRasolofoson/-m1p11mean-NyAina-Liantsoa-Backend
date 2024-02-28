@@ -19,7 +19,11 @@ const Appointment = mongoose.model(
                     ref: "AppointmentDetail"
                 }
             ],
-            sumPrice: Number
+            sumPrice: Number,
+            isRappel: {
+                type: Number,
+                default: 0
+            }
         },
         { timestamps: true }
     )
