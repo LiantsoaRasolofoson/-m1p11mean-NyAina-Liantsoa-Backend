@@ -1,5 +1,6 @@
 const HttpError = require('../httperror');
 const db = require('../models');
+const ServiceEmployee = require('../models/serviceEmployee.model');
 const employeeService = require('./employee.service');
 const Service = db.service;
 const User = db.user;
@@ -63,6 +64,9 @@ const getDataFor = async(entityName, entityId, userId) => {
         jsonResponse.userReview = (userId) ? await Review.findOne(query).populate('user', 'name firstName').exec() : null;
         // add the mean note
         jsonResponse.note = getServiceMeanReview(reviews);
+        if(entityName == "employee"){
+            jsonResponse.services = await ServiceEmployee.findOne({ employee : entityId }).populate({path: 'services', select: 'name'}).exec();
+        }
         return jsonResponse;
     }catch(err){
         throw err;

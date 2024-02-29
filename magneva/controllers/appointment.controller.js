@@ -58,4 +58,15 @@ router.post("/payment/create", createPaymentMiddlewares(), async (req, res, next
     }
 })
 
+router.get("/:id", async (req, res, next) => {
+    try{
+        let jsonResponse = {};
+        jsonResponse.appointment = await appointmentService.getAppointment(req.params.id);
+        jsonResponse.isAlreadyPassed = appointmentService.isAlreadyPassed(jsonResponse.appointment);
+        res.status(200).send(jsonResponse);
+    }catch(err){
+        next (err);
+    }
+})
+
 module.exports = router;

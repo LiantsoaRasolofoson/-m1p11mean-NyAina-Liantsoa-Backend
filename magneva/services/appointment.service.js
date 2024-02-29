@@ -29,20 +29,23 @@ const checkDate = (date) => {
     }
 }
 
+const checkEmployeeAvalability = (employeeId, date, hourBegin, hourEnd) => {
+    //todo check employee
+}
+
 const createAppointment = async (data) => {
     // TODO: Wrap in a transaction
     data.date = new Date(data.date);
-    data.hour = moment(data.hour, "HH:mm").format("HHmm");
-    let session;
-    try{
-        // Using Mongoose's default connection
-        session = await db.mongoose.startSession();
-        console.log(session);
+    data.hour = parseInt(moment(data.hour, "HH:mm").format("HHmm"));
+    console.log(typeof(data.hour));
 
+    let session = await db.mongoose.startSession();
+    session.startTransaction();
+
+    try{
         checkDate(data.date);
         await checkHour(data.date, data.hour);
         
-        session.startTransaction();
         //create the appointment
         console.log('create appointment');
         let appointment = new Appointment ({
@@ -54,33 +57,38 @@ const createAppointment = async (data) => {
 
         let hourBegin = data.hour;
         let sumPrice = 0;
-        let details = [];
         let duration = 0;
+        let details = [];
 
         for(let i=0; i < data.services.length; i++ ){
+            let serviceDuration = parseInt(data.services[i].entity.duration);
+            let hourEnd = hourBegin + serviceDuration;
+            checkEmployeeAvalability(data.services[i].employee.entity._id, data.date, hourBegin, hourEnd);
+
             let tmp = new AppointmentDetail ({
                 service : data.services[i].entity._id,
                 employee : data.services[i].employee.entity._id,
                 price : data.services[i].entity.price,
                 reduction : serviceService.getReduction(),
                 hourBegin : hourBegin,
-                hourEnd : hourBegin + parseInt(data.services[i].entity.duration),
+                hourEnd : hourEnd,
                 client : data.userId ,
                 appointment : appointment._id
             })
-            hourBegin = hourBegin + parseInt(data.services[i].entity.duration);
+            hourBegin = hourEnd
             await tmp.save();
-            sumPrice += parseInt(tmp.price) * (1 + tmp.reduction / 100) ; // add the reduction
-            duration += parseInt(data.services[i].entity.duration);
+
+            duration += serviceDuration;
+            sumPrice += parseInt(tmp.price) * (1 - tmp.reduction / 100) ; // add the reduction
             details.push(tmp);
         }
 
         appointment.sumPrice = sumPrice;
+        appointment.duration = duration;
         appointment.appointmentDetails = details;
-        appointment.duration = duration
+        await appointment.save();
 
         await session.commitTransaction();
-        await appointment.save();
        return appointment;   
     }catch(err){
         console.log('Aborting');
@@ -147,6 +155,30 @@ const getAppointments = async (query) => {
     jsonResponse.count = await AppointmentView.countDocuments(searchCriteria).exec();
 
     return jsonResponse;
+}
+
+const getAppointment = async (id) => {
+    return await Appointment.findOne({ _id : id})
+    .populate({
+        path: 'appointmentDetails',
+        populate: [
+        {
+            path: 'employee',
+            select: 'name firstName'
+        },
+        {
+            path: 'service',
+            select: 'name duration'
+        } ]
+    })
+    .exec();
+}
+
+const isAlreadyPassed = (appointment) => {
+    let currentDate = getCurrentDate();
+    let currentTime = parseInt(momentTimezone.tz('Indian/Antananarivo').format("HHmm"));
+    let appointmentDate = convertToTimezoneDate(new Date(appointment.date));
+    return appointmentDate <= currentDate && appointment.hour < currentTime;
 }
 
 const getCurrentDate = () => {
@@ -255,5 +287,7 @@ module.exports = {
     finishTaskEmployee,
     getTaskEmployee,
     getAppointmentEmployee,
-    getCreateDatas
+    getCreateDatas,
+    getAppointment,
+    isAlreadyPassed
 }
