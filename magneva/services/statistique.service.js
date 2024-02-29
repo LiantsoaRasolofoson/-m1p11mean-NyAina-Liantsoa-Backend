@@ -6,6 +6,8 @@ const PurchaseView = db.purchaseView;
 const StatAppointment = db.statAppointment;
 const Payment = db.payment;
 const ChiffreAffaire = db.chiffreAffaire;
+const { getAppointmentEmployee } = require("./appointment.service");
+const { getValidEmployees } = require("./employee.service");
 
 const generateDateArray = (dateDebut, dateFin) => {
     const startDate = new Date(dateDebut);
@@ -38,9 +40,9 @@ const statAppointmentInOneDay = async (req, res) => {
         for (const date of dates) {
             let nb = await nbAppointmentInOneDay(date);
             let stat = {
-                date: date,
-                nb: nb
-            };
+                name: date.toISOString().split('T')[0],
+                y: nb
+            }
             stats.push(stat);
         }
         return stats;
@@ -57,10 +59,9 @@ const statAppointment = async (req, res) => {
         const stats = allMois().map(month => {
             const stat = lists.find(list => list.month === month.month);
             return {
-                month: month.month,
-                monthName: month.monthName,
-                nb: stat ? stat.nb : 0
-            };
+                name: month.monthName,
+                y: stat ? stat.nb : 0
+            }
         });
         return stats;
     }
@@ -91,9 +92,9 @@ const chiffreAffaireDay = async (req, res) => {
         for (const date of dates) {
             let ca = await chiffreAffaireDayInOneDay(date);
             let stat = {
-                date: date,
-                ca: ca
-            };
+                name: date.toISOString().split('T')[0],
+                y: ca
+            }
             stats.push(stat);
         }
         return stats;
@@ -123,17 +124,14 @@ const allMois = () => {
 const chiffreAffaire = async (year) => {
     try {
         const chiffres = await ChiffreAffaire.find({year: year}).exec();
-        console.log(chiffres);
-        const cas = allMois().map(month => {
+        const stats = allMois().map(month => {
             const monthCa = chiffres.find(chiffre => chiffre.month === month.month);
             return {
-                month: month.month,
-                monthName: month.monthName,
-                ca: monthCa ? monthCa.ca : 0,
-                year: year
-            };
+                name: month.monthName,
+                y: monthCa ? monthCa.ca : 0
+            }
         });
-        return cas;
+        return stats;
     }
     catch (error) {
         throw error;
@@ -144,20 +142,18 @@ const allDepenses = async (year) => {
     try {
         const expenses = await ExpenseView.find({year: year}).exec();
         const purchases = await PurchaseView.find({year: year}).exec();
-        const depenses = allMois().map(month => {
+        const stats = allMois().map(month => {
             const monthExpense = expenses.find(expense => expense.month === month.month);
             const monthPurchase = purchases.find(purchase => purchase.month === month.month);
             let amountExpense = monthExpense ? monthExpense.amount : 0;
             let amountPurchase = monthPurchase ? monthPurchase.amount : 0;
             let amount = amountExpense + amountPurchase;
             return {
-                month: month.month,
-                monthName: month.monthName,
-                amount: amount,
-                year: year
-            };
+                name: month.monthName,
+                y: amount
+            }
         });
-        return depenses;
+        return stats;
     }
     catch (error) {
         throw error;
@@ -168,17 +164,80 @@ const profit = async (req, res) => {
     try{
         const depenses = await allDepenses(req.body.year);
         const chiffres = await chiffreAffaire(req.body.year);
-        const profit = [];
+        const stats = [];
         for (let i = 0; i < depenses.length; i++) {
-            const benefice = chiffres[i].ca - depenses[i].amount;
-            let p = {
-                month: chiffres[i].month,
-                monthName: chiffres[i].monthName,
-                profit: benefice
+            const benefice = chiffres[i].y - depenses[i].y;
+            let stat = {
+                name: chiffres[i].name,
+                y: benefice
             };
-            profit.push(p);
+            stats.push(stat);
         }
-        return profit;
+        return stats;
+    }
+    catch (error) {
+        throw error;
+    }
+}
+
+const statsInit = async(req, res) => {
+    try{
+        const stats = {
+            nbReservationJour: await statAppointmentInOneDay(req, res),
+            nbReservationMois: await statAppointment(req, res),
+            caJour: await chiffreAffaireDay(req, res),
+            caMois: await chiffreAffaire(req.body.year),
+            profit: await profit(req, res),
+            emp: await statEmp(req, res)
+        }
+        return stats;
+    }
+    catch (error) {
+        throw error;
+    }
+}
+
+const getTempsOneEmp = async (employee, startDate, endDate) => {
+    try{
+        let hourly = 0;
+        const temps = await getAppointmentEmployee(employee._id.toString(), startDate, endDate, 1);
+        temps.forEach(t=> {
+            let h = t.hourEnd - t.hourBegin;
+            hourly += h;
+        });
+        return hourly;
+    }
+    catch (error) {
+        throw error;
+    }
+}
+
+const formatHour = (hour)  => {
+    let numberString = hour.toString();
+    if (numberString.length < 4 && numberString.length !== 1) {
+        numberString = "0" + numberString;
+    };
+    if( numberString.length === 1 ){
+      numberString = "000" + numberString;
+    }
+    const hourFormatted = numberString.slice(0, 2);
+    const minuteFormatted = numberString.slice(2, 4);
+    return `${hourFormatted}:${minuteFormatted}`;
+}
+
+const statEmp = async(req, res) => {
+    try{
+        const stats = [];
+        const employees = await getValidEmployees();
+        for (const employee of employees) {
+            const hour = await getTempsOneEmp(employee, req.body.startDate, req.body.endDate);
+            const stat = {
+                employee: employee,
+                hour: formatHour(hour)
+            };
+            stats.push(stat);
+        }
+        return stats;
     }
     catch (error) {
         throw error;
@@ -191,5 +250,7 @@ module.exports = {
     chiffreAffaireDay,
     chiffreAffaire,
     profit,
-    allDepenses
+    allDepenses,
+    statsInit,
+    statEmp
 }

@@ -57,5 +57,21 @@ router.post("/profit", statistiqueMiddlewares(), async (req, res, next) => {
     }
 })
 
+router.post("/statsInit", statistiqueMiddlewares(), async (req, res, next) => {
+    try{
+        res.status(200).send(await statistiqueService.statsInit(req, res));
+    }catch(err){
+        next(err);
+    }
+})
+
+router.post("/statEmp", statistiqueMiddlewares(), async (req, res, next) => {
+    try{
+        res.status(200).send(await statistiqueService.statEmp(req, res));
+    }catch(err){
+        next(err);
+    }
+})
+
 
 module.exports = router;
