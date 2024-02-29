@@ -29,9 +29,17 @@ const checkDate = (date) => {
     }
 }
 
+
+const getUserAppointments = async (userId) => {
+    return await Appointment.find({ user : userId}).exec();
+}
+
+
 const checkEmployeeAvalability = (employeeId, date, hourBegin, hourEnd) => {
     //todo check employee
 }
+
+
 
 const createAppointment = async (data) => {
     // TODO: Wrap in a transaction
@@ -289,5 +297,6 @@ module.exports = {
     getAppointmentEmployee,
     getCreateDatas,
     getAppointment,
-    isAlreadyPassed
+    isAlreadyPassed,
+    getUserAppointments
 }

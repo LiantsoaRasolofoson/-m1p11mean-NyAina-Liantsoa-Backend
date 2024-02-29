@@ -69,4 +69,12 @@ router.get("/:id", async (req, res, next) => {
     }
 })
 
+router.get("/user/:userId", async (req, res, next) => {
+    try{
+        res.status(200).send(await appointmentService.getUserAppointments(req.params.userId));
+    }catch(err){
+        next(err);
+    }
+})
+
 module.exports = router;
