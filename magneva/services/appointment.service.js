@@ -9,6 +9,9 @@ const moment = require('moment');
 const momentTimezone = require('moment-timezone');
 const HttpError = require('../httperror');
 const serviceService = require('./service.service');
+const { sendEmail } = require("./email.service");
+
+const cron = require('node-cron');
 
 const checkHour = async (date, hour) => {
     let openingHour = await OpeningHour.findOne({ day: date.getDay() }).exec();
@@ -288,6 +291,29 @@ const getCreateDatas = async (services, employees) => {
     jsonResponse.employees = await mapEmployeesByService(employees);
     return jsonResponse;
 }
+
+const sendMailToClient = async (appointment) => {
+    if( appointment.isRappel === 0 ){
+        to = appointment.user.email;
+        subject = "MAGNEVA: Rappel de rendez-vous";
+        text = "<p>Cher/Chère <b>"+appointment.user.name+" "+appointment.user.firstName+"</b>, </p><br/>";
+        text += "<p>Nous tenons à vous rappeler que vous avez un rendez-vous prévu demain. Nous sommes impatients de vous accueillir et de vous offrir nos services de qualité.</p><br/>";
+        text += "<p>Cordialement, </p><br/><p><span style='color: blue'>Magneva </span></p><p><span style='color: blue'>034 86 158 50 </span></p>";
+        sendEmail(to, subject, text);
+        appointment.isRappel = 1;
+        await appointment.save();
+    }
+}
+
+cron.schedule('* * * * *', async () => {
+    let tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    let appointments = await Appointment.find().populate('user').exec();
+    appointments.forEach(async (appointment) => {
+        await sendMailToClient(appointment);
+    });
+});
 
 module.exports = {
     createAppointment,

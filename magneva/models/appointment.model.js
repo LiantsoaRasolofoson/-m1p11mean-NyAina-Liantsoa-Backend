@@ -25,7 +25,11 @@ const Appointment = mongoose.model(
                 type: Boolean,
                 default: false
             },
-            duration: Number
+            duration: Number,
+            isRappel: {
+                type: Number,
+                default: 0
+            }
         },
         { timestamps: true }
     )
