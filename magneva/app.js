@@ -18,6 +18,8 @@ var reviewController = require('./controllers/review.controller');
 
 var emailController = require('./controllers/email.controller');
 var specialOfferController = require('./controllers/specialOffer.controller');
+var statistiqueController = require('./controllers/statistique.controller');
+
 const cors = require("cors");
 const bodyParser = require('body-parser');
 
@@ -54,6 +56,7 @@ app.use('/review', reviewController);
 
 app.use('/email', emailController);
 app.use('/specialOffer', specialOfferController);
+app.use('/statistique', statistiqueController);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -133,7 +133,10 @@ const getAppointments = async (query) => {
     }
       
     if(query.isPaid && query.isPaid.trim() ){
-        searchCriteria['isPaid'] = false;
+        let convert = {};
+        convert.true = true;
+        convert.false = false;
+        searchCriteria['isPaid'] = convert[query.isPaid];
     }
     console.log(searchCriteria);
 
@@ -183,7 +186,7 @@ const getAppointmentEmployee = async(employeeID, startDate, endDate, isFinished)
             filter.isFinished = parseIsFinished;
         }
     };
-    const appointments = await AppointmentDetails.find(filter)
+    const appointments = await AppointmentDetail.find(filter)
     .populate('service')
     .populate('client')
     .populate('appointment')
@@ -208,7 +211,7 @@ const getAppointmentEmployee = async(employeeID, startDate, endDate, isFinished)
 const finishTaskEmployee = async(req, res) => {
     const appointmentDetailID = req.params.appointmentDetailID;
     try{
-        const appointmentDetail = await AppointmentDetails.findOne({_id: appointmentDetailID}).exec();
+        const appointmentDetail = await AppointmentDetail.findOne({_id: appointmentDetailID}).exec();
         if(!appointmentDetail) {
             throw new HttpError("Cette tâche n'existe pas", 400);
         }

@@ -9,6 +9,8 @@ var reviewService = require("./review.service");
 var hourlyEmployeeService = require("./hourlyEmployee.service");
 var emailService = require("./email.service");
 var specialOfferService = require("./specialOffer.service");
+var statistiqueService = require("./statistique.service");
+var paymentService = require("./payment.service");
 
 const service = {};
 
@@ -23,6 +25,8 @@ service.reviewService = reviewService;
 service.hourlyEmployeeService = hourlyEmployeeService;
 service.emailService = emailService;
 service.specialOfferService = specialOfferService;
+service.statistiqueService = statistiqueService;
+service.paymentService = paymentService;
 
 module.exports = service;
 
