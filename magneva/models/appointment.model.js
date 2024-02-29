@@ -23,7 +23,8 @@ const Appointment = mongoose.model(
             isPaid : {
                 type: Boolean,
                 default: false
-            }
+            },
+            duration: Number
         },
         { timestamps: true }
     )

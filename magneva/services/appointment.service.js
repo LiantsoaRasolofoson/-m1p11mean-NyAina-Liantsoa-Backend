@@ -55,6 +55,8 @@ const createAppointment = async (data) => {
         let hourBegin = data.hour;
         let sumPrice = 0;
         let details = [];
+        let duration = 0;
+
         for(let i=0; i < data.services.length; i++ ){
             let tmp = new AppointmentDetail ({
                 service : data.services[i].entity._id,
@@ -69,11 +71,14 @@ const createAppointment = async (data) => {
             hourBegin = hourBegin + parseInt(data.services[i].entity.duration);
             await tmp.save();
             sumPrice += parseInt(tmp.price) * (1 + tmp.reduction / 100) ; // add the reduction
+            duration += parseInt(data.services[i].entity.duration);
             details.push(tmp);
         }
 
         appointment.sumPrice = sumPrice;
         appointment.appointmentDetails = details;
+        appointment.duration = duration
+
         await session.commitTransaction();
         await appointment.save();
        return appointment;   
