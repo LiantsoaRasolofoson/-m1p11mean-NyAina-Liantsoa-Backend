@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const { body } = require('express-validator');
 const { requestValidation } = require('../middlewares');
-const { appointmentService, reviewService } = require('../services');
+const { appointmentService, reviewService, paymentService } = require('../services');
 
 function createAppointmentMiddlewares(){
     return [
@@ -17,12 +17,11 @@ router.post("/create", createAppointmentMiddlewares(), async (req, res, next) =>
     }catch(err){
         next(err);
     }
-    
 })
 
 router.get("/list", async (req, res, next) => {
     try{
-        res.status(200).send(await appointmentService.getAppointments(req.body));
+        res.status(200).send(await appointmentService.getAppointments(req.query));
     }catch(err){
         next(err);
     }
@@ -34,6 +33,28 @@ router.get("/create/datas", async (req, res, next) => {
         await reviewService.getEntitiesWithReviews("employee")));
     }catch(err){
         next (err);
+    }
+})
+
+function createPaymentMiddlewares(){
+    return [
+        body('date').notEmpty().withMessage('La date est requise'),
+        body('appointment').notEmpty().withMessage('Rendez-vous requis'),
+        body('amount').isNumeric().withMessage('Montant invalide').custom(value => {
+            if (value < 0) {
+                throw new Error('Le montant ne peut pas être négatif');
+            }
+            return true;
+        }),
+        requestValidation.check
+    ]   
+}
+
+router.post("/payment/create", createPaymentMiddlewares(), async (req, res, next) => {
+    try{
+        res.status(201).send(await paymentService.createPayment(req, res));   
+    }catch(err){
+        next(err);
     }
 })
 

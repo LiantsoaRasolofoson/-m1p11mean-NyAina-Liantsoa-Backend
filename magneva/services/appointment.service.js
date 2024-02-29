@@ -128,7 +128,10 @@ const getAppointments = async (query) => {
     }
       
     if(query.isPaid && query.isPaid.trim() ){
-        searchCriteria['isPaid'] = false;
+        let convert = {};
+        convert.true = true;
+        convert.false = false;
+        searchCriteria['isPaid'] = convert[query.isPaid];
     }
     console.log(searchCriteria);
 
