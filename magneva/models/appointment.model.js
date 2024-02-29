@@ -20,6 +20,7 @@ const Appointment = mongoose.model(
                 }
             ],
             sumPrice: Number,
+            duration: Number,
             isPaid : {
                 type: Boolean,
                 default: false

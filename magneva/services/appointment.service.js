@@ -29,6 +29,11 @@ const checkDate = (date) => {
     }
 }
 
+const checkEmployeeAvalability = (employeeId, date, hourBegin, hourEnd) => {
+    //todo check employee
+}
+
+
 const createAppointment = async (data) => {
     // TODO: Wrap in a transaction
     data.date = new Date(data.date);
@@ -43,6 +48,7 @@ const createAppointment = async (data) => {
         await checkHour(data.date, data.hour);
         
         session.startTransaction();
+        
         //create the appointment
         console.log('create appointment');
         let appointment = new Appointment ({
@@ -54,28 +60,37 @@ const createAppointment = async (data) => {
 
         let hourBegin = data.hour;
         let sumPrice = 0;
+        let duration = 0;
         let details = [];
+
         for(let i=0; i < data.services.length; i++ ){
+            let serviceDuration = parseInt(data.services[i].entity.duration);
+            let hourEnd = hourBegin + serviceDuration;
+            checkEmployeeAvalability(data.services[i].employee.entity._id, data.date, hourBegin, hourEnd);
+
             let tmp = new AppointmentDetail ({
                 service : data.services[i].entity._id,
                 employee : data.services[i].employee.entity._id,
                 price : data.services[i].entity.price,
                 reduction : serviceService.getReduction(),
                 hourBegin : hourBegin,
-                hourEnd : hourBegin + parseInt(data.services[i].entity.duration),
+                hourEnd : hourEnd,
                 client : data.userId ,
                 appointment : appointment._id
             })
-            hourBegin = hourBegin + parseInt(data.services[i].entity.duration);
+            hourBegin = hourEnd
             await tmp.save();
+            duration += serviceDuration;
             sumPrice += parseInt(tmp.price) * (1 + tmp.reduction / 100) ; // add the reduction
             details.push(tmp);
         }
 
         appointment.sumPrice = sumPrice;
+        appointment.duration = duration;
         appointment.appointmentDetails = details;
-        await session.commitTransaction();
         await appointment.save();
+
+        await session.commitTransaction();
        return appointment;   
     }catch(err){
         console.log('Aborting');
@@ -139,6 +154,18 @@ const getAppointments = async (query) => {
     jsonResponse.count = await AppointmentView.countDocuments(searchCriteria).exec();
 
     return jsonResponse;
+}
+
+const getAppointment = async (id) => {
+    return await Appointment.findOne({ _id : id})
+    .populate({
+        path: 'appointmentDetails',
+        populate: {
+            path: 'employee',
+            select: 'name firstName'
+        }
+    })
+    .exec();
 }
 
 const getCurrentDate = () => {
@@ -247,5 +274,6 @@ module.exports = {
     finishTaskEmployee,
     getTaskEmployee,
     getAppointmentEmployee,
-    getCreateDatas
+    getCreateDatas,
+    getAppointment
 }
