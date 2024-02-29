@@ -27,7 +27,7 @@ function signUpMiddlewares(){
     return [
         body('name').notEmpty().withMessage('Nom requis'),
         body('firstName').notEmpty().withMessage('Prénom requis'),
-        body('sex').notEmpty(),
+        body('sex').notEmpty().withMessage('Genre est requis'),
         body('password').notEmpty().withMessage('Mot de passe requis'),
         body('email').isEmail().withMessage('Email requis'),
         requestValidation.check
