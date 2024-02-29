@@ -33,21 +33,18 @@ const checkEmployeeAvalability = (employeeId, date, hourBegin, hourEnd) => {
     //todo check employee
 }
 
-
 const createAppointment = async (data) => {
     // TODO: Wrap in a transaction
     data.date = new Date(data.date);
-    data.hour = moment(data.hour, "HH:mm").format("HHmm");
-    let session;
-    try{
-        // Using Mongoose's default connection
-        session = await db.mongoose.startSession();
-        console.log(session);
+    data.hour = parseInt(moment(data.hour, "HH:mm").format("HHmm"));
+    console.log(typeof(data.hour));
 
+    let session = await db.mongoose.startSession();
+    session.startTransaction();
+
+    try{
         checkDate(data.date);
         await checkHour(data.date, data.hour);
-        
-        session.startTransaction();
         
         //create the appointment
         console.log('create appointment');
@@ -80,8 +77,9 @@ const createAppointment = async (data) => {
             })
             hourBegin = hourEnd
             await tmp.save();
+
             duration += serviceDuration;
-            sumPrice += parseInt(tmp.price) * (1 + tmp.reduction / 100) ; // add the reduction
+            sumPrice += parseInt(tmp.price) * (1 - tmp.reduction / 100) ; // add the reduction
             details.push(tmp);
         }
 
@@ -160,12 +158,24 @@ const getAppointment = async (id) => {
     return await Appointment.findOne({ _id : id})
     .populate({
         path: 'appointmentDetails',
-        populate: {
+        populate: [
+        {
             path: 'employee',
             select: 'name firstName'
-        }
+        },
+        {
+            path: 'service',
+            select: 'name duration'
+        } ]
     })
     .exec();
+}
+
+const isAlreadyPassed = (appointment) => {
+    let currentDate = getCurrentDate();
+    let currentTime = parseInt(momentTimezone.tz('Indian/Antananarivo').format("HHmm"));
+    let appointmentDate = convertToTimezoneDate(new Date(appointment.date));
+    return appointmentDate <= currentDate && appointment.hour < currentTime;
 }
 
 const getCurrentDate = () => {
@@ -275,5 +285,6 @@ module.exports = {
     getTaskEmployee,
     getAppointmentEmployee,
     getCreateDatas,
-    getAppointment
+    getAppointment,
+    isAlreadyPassed
 }

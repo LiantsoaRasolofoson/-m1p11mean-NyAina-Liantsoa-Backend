@@ -39,7 +39,10 @@ router.get("/create/datas", async (req, res, next) => {
 
 router.get("/:id", async (req, res, next) => {
     try{
-        res.status(200).send(await appointmentService.getAppointment(req.params.id));
+        let jsonResponse = {};
+        jsonResponse.appointment = await appointmentService.getAppointment(req.params.id);
+        jsonResponse.isAlreadyPassed = appointmentService.isAlreadyPassed(jsonResponse.appointment);
+        res.status(200).send(jsonResponse);
     }catch(err){
         next (err);
     }
